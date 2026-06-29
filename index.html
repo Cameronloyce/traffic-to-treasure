@@ -160,12 +160,57 @@
   .deal-card .urgency{color:var(--muted);font-size:.8rem;margin-top:16px;}
   .deal-card .urgency b{color:var(--ink);}
 
+  /* free section = the "demo zone": a distinct, slightly warmer/red-tinted area */
   .free-gate{background:
-    radial-gradient(700px 300px at 50% 0,rgba(200,255,55,.08),transparent 60%),var(--charcoal);}
-  .gate-card{max-width:560px;margin:0 auto;text-align:center;background:var(--card);
+    radial-gradient(800px 360px at 50% 0,rgba(255,107,94,.10),transparent 62%),var(--charcoal-2);}
+  .gate-card{max-width:580px;margin:0 auto;text-align:center;background:var(--card);
     border:1px solid var(--line);border-radius:20px;padding:40px 30px;}
-  .gate-card .adnote{color:var(--muted);font-size:.92rem;margin-top:18px;}
-  .gate-card .tiny{color:var(--muted);font-size:.78rem;margin-top:14px;}
+  .gate-card .tiny{color:var(--muted);font-size:.82rem;margin-top:22px;line-height:1.55;}
+  .host-guide{text-align:left;background:var(--charcoal-2);border:1px solid var(--line);
+    border-radius:12px;padding:16px 20px;margin-top:22px;}
+  .host-guide .hg-title{font-family:'Space Grotesk';font-weight:600;font-size:.86rem;
+    color:var(--ink);margin-bottom:8px;}
+  .host-guide ul{margin:0;padding-left:18px;}
+  .host-guide li{color:var(--muted);font-size:.86rem;margin-bottom:5px;}
+  .host-guide li b{color:var(--ink);}
+
+  /* live-demo warning box */
+  .demo-badge{display:inline-block;background:var(--red);color:#fff;font-family:'Space Grotesk';
+    font-weight:700;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;
+    padding:5px 12px;border-radius:999px;margin-bottom:14px;}
+  .warnbox{text-align:left;background:rgba(255,107,94,.08);border:1px solid rgba(255,107,94,.4);
+    border-radius:12px;padding:18px 20px;margin:0 0 22px;}
+  .warnbox .wtitle{font-family:'Space Grotesk';font-weight:700;color:var(--red);font-size:.95rem;margin-bottom:8px;}
+  .warnbox p{color:var(--muted);font-size:.88rem;margin:0;}
+  .warnbox b{color:var(--ink);}
+
+  /* author trust block */
+  .author{display:flex;gap:16px;align-items:center;text-align:left;
+    background:var(--charcoal-2);border:1px solid var(--line);border-radius:14px;
+    padding:16px 18px;margin:24px auto 0;max-width:560px;}
+  .author img{width:60px;height:60px;border-radius:50%;object-fit:cover;
+    border:2px solid var(--lime);flex-shrink:0;}
+  .author .atext{font-size:.88rem;color:var(--muted);line-height:1.5;}
+  .author .atext b{color:var(--ink);font-family:'Space Grotesk';}
+
+  /* skip-ads badge near paid button */
+  .skipbadge{display:inline-flex;align-items:center;gap:7px;background:var(--charcoal-2);
+    border:1px solid var(--line);border-radius:999px;padding:7px 14px;margin-top:16px;
+    font-size:.82rem;color:var(--ink);font-weight:500;}
+  .skipbadge .bolt{color:var(--lime);font-size:1rem;}
+
+  /* exit-intent popup */
+  .exit-overlay{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.72);
+    display:none;align-items:center;justify-content:center;padding:22px;}
+  .exit-overlay.show{display:flex;}
+  .exit-modal{background:var(--card);border:1px solid var(--line);border-radius:20px;
+    max-width:440px;width:100%;padding:34px 30px;text-align:center;position:relative;
+    box-shadow:0 30px 70px rgba(0,0,0,.6);}
+  .exit-modal h3{font-size:1.5rem;margin-bottom:10px;}
+  .exit-modal p{color:var(--muted);font-size:.95rem;margin-bottom:8px;}
+  .exit-modal .close{position:absolute;top:14px;right:18px;background:none;border:none;
+    color:var(--muted);font-size:1.4rem;cursor:pointer;line-height:1;}
+  .exit-modal .close:hover{color:var(--ink);}
 
   /* faq */
   details{background:var(--card);border:1px solid var(--line);border-radius:12px;
@@ -291,7 +336,9 @@
       <tr><td>The link that unlocks the higher payout tier</td><td class="no">—</td><td class="yes">Yes</td></tr>
       <tr><td>Traffic + clean-link system</td><td class="no">—</td><td class="yes">Yes</td></tr>
       <tr><td>Stacking + scaling to more income</td><td class="no">—</td><td class="yes">Yes</td></tr>
+      <tr><td>User experience</td><td class="no">High friction — 3+ ad layers, fake buttons &amp; countdowns on Up4Ever</td><td class="yes">Zero friction — instant, secure, ad-free PDF via Payhip + email delivery</td></tr>
     </table>
+    <p style="color:var(--muted);font-size:.86rem;margin-top:18px;">Don't want to deal with file-host ads and countdowns? Grab the full playbook for <span style="color:var(--lime);font-weight:600;">$3.99</span> and get an instant, direct PDF right now. <a href="#deal" style="color:var(--lime);text-decoration:none;border-bottom:1px solid var(--line);">See the deal →</a></p>
   </div>
 </section>
 
@@ -301,7 +348,7 @@
     <h2>Get the full playbook</h2>
     <p>Instant download after checkout. Read it tonight, start tomorrow.</p>
 
-    <div class="deal-card">
+    <div class="deal-card" id="deal">
       <span class="ribbon pill">Launch price · 33% off</span>
       <div class="save">You save $2.00</div>
       <div class="pricetag">
@@ -311,7 +358,13 @@
       <div class="btn-row" style="justify-content:center;margin-top:22px;">
         <a class="btn btn-primary" href="https://payhip.com/buy?link=aJTdq">Lock in $3.99 →</a>
       </div>
+      <div class="skipbadge"><span class="bolt">⚡</span> Skip the Up4Ever ads &amp; get instant access</div>
       <p class="urgency"><b>Heads up:</b> this is the launch price. It goes back to $5.99 soon.</p>
+    </div>
+
+    <div class="author">
+      <img src="images/cameron.png" alt="Cameron Loyce" />
+      <p class="atext">"I use Up4Ever to <b>teach</b> you the ad model — but Payhip to <b>serve</b> you. The paid version is instant, clean, and lands straight in your inbox. No fake buttons, no countdowns." <br>— <b>Cameron Loyce</b></p>
     </div>
 
     <p style="color:var(--muted);font-size:.85rem;margin-top:22px;">Not ready? The <a href="#free" style="color:var(--lime);text-decoration:none;border-bottom:1px solid var(--line);">free lite version</a> is right below.</p>
@@ -322,14 +375,39 @@
 <section class="free-gate" id="free">
   <div class="wrap">
     <div class="gate-card">
-      <span class="pill outline">100% free</span>
-      <h2 class="big" style="margin-top:16px;">Start free. Zero risk.</h2>
-      <p style="color:var(--muted);">Read the first chapters free and see if it clicks. Just watch one quick ad on the download page — that's what keeps it free. No card, no email wall.</p>
+      <span class="demo-badge">⚠ Live demo of the ad model</span>
+      <h2 class="big" style="margin-top:6px;">Start free. Zero risk.</h2>
+
+      <div class="warnbox">
+        <p class="wtitle">Heads up — this is on purpose</p>
+        <p>This file is hosted on <b>Up4Ever</b>. You'll see pop-ups, fake download buttons, and a countdown timer. That's <b>exactly</b> the ad model I teach in Chapter 4. If it frustrates you, imagine how your future visitors feel — then learn to navigate it. Or skip the headache and grab the clean version below.</p>
+      </div>
+
+      <div class="author">
+        <img src="images/cameron.png" alt="Cameron Loyce" />
+        <p class="atext">"I'm <b>Cameron</b>. I host the free version on Up4Ever on purpose — to show you how ad revenue works in the wild. If the ads look scary, that's the point. Trust the process and you'll know exactly how to navigate it."</p>
+      </div>
+
       <div class="btn-row" style="justify-content:center;">
         <a class="btn btn-primary" href="https://www.up-4ever.net/55zofzcrdiin">Download the free version</a>
       </div>
-      <p class="adnote">One short ad keeps it free. Then it's yours.</p>
-      <p class="tiny">Like it? The full book — ad setup, the payout-tier link, the traffic system, scaling — is just <span style="color:var(--lime);font-weight:600;">$3.99 right now</span> <span class="strike" style="color:var(--muted);">$5.99</span>. <a href="#" style="color:var(--lime);text-decoration:none;border-bottom:1px solid var(--line);">Scroll up to grab the deal.</a></p>
+
+      <div class="host-guide">
+        <p class="hg-title">On the host page:</p>
+        <ul>
+          <li>Ignore the flashing banners and fake buttons.</li>
+          <li>Look for the real <b>"Free Download"</b> button.</li>
+          <li>Pass the captcha if it asks, then wait out the countdown.</li>
+          <li>The PDF downloads on its own. Done.</li>
+        </ul>
+      </div>
+
+      <details style="text-align:left;margin-top:16px;">
+        <summary>Is the Up4Ever link safe?</summary>
+        <div class="ans">Yes. The file is a standard PDF — nothing else. The ads come from the host (Up4Ever), not from me. Just ignore the flashing banners and click the real "Download" button when the timer ends. Want a 100% clean experience? Grab the paid version — instant, ad-free, straight to your email.</div>
+      </details>
+
+      <p class="tiny">Don't want to deal with the ads and countdowns? The full book is a clean, instant, 1-click download for <span style="color:var(--lime);font-weight:600;">$3.99 right now</span> <span class="strike" style="color:var(--muted);">$5.99</span>. <a href="#deal" style="color:var(--lime);text-decoration:none;border-bottom:1px solid var(--line);">Grab the deal.</a></p>
     </div>
   </div>
 </section>
@@ -375,6 +453,52 @@
     <p style="margin-top:14px;opacity:.6;">© 2026 Zero to Paid</p>
   </div>
 </footer>
+
+<!-- EXIT-INTENT UPSELL -->
+<div class="exit-overlay" id="exitPopup" role="dialog" aria-modal="true">
+  <div class="exit-modal">
+    <button class="close" id="exitClose" aria-label="Close">×</button>
+    <span class="pill">$3.99 · 33% off</span>
+    <h3 style="margin-top:14px;">Tired of the ad demo?</h3>
+    <p>Get the <b style="color:var(--ink);">instant, ad-free PDF</b> — the full playbook, including the Monetag setup, traffic, and scaling chapters — for just <b style="color:var(--lime);">$3.99</b>. No fake buttons, no countdowns — it lands straight in your inbox.</p>
+    <div class="btn-row" style="justify-content:center;margin-top:20px;">
+      <a class="btn btn-primary" href="https://payhip.com/buy?link=aJTdq">Get the clean version →</a>
+    </div>
+    <p style="font-size:.78rem;color:var(--muted);margin-top:14px;cursor:pointer;" id="exitDismiss">No thanks, I'll brave the ads</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  var popup = document.getElementById('exitPopup');
+  var shown = false;
+  function fire(){
+    if (shown || sessionStorage.getItem('exitShown')) return;
+    shown = true;
+    sessionStorage.setItem('exitShown','1');
+    popup.classList.add('show');
+  }
+  function close(){ popup.classList.remove('show'); }
+  document.getElementById('exitClose').addEventListener('click', close);
+  document.getElementById('exitDismiss').addEventListener('click', close);
+  popup.addEventListener('click', function(e){ if(e.target === popup) close(); });
+
+  // Desktop: mouse leaves the top of the viewport
+  document.addEventListener('mouseout', function(e){
+    if (!e.relatedTarget && e.clientY <= 0) fire();
+  });
+
+  // Mobile: user has scrolled past the free section, then scrolls up fast (leaving intent)
+  var lastY = window.scrollY, freeTop = 0;
+  var freeEl = document.getElementById('free');
+  if (freeEl) freeTop = freeEl.offsetTop;
+  window.addEventListener('scroll', function(){
+    var y = window.scrollY;
+    if (y < lastY - 12 && y > freeTop * 0.5 && lastY > freeTop) fire();
+    lastY = y;
+  }, {passive:true});
+})();
+</script>
 
 </body>
 </html>
