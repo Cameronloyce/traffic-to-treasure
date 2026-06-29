@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Zero to Paid — start from 0 on X and get paid by ads</title>
+<meta name="description" content="The lazy beginner's playbook: blow up on X from zero, build a free site, and turn attention into ad revenue. Free lite version, or grab the full book." />
+
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+<style>
+  :root{
+    --charcoal:#15181c;
+    --charcoal-2:#1d2127;
+    --card:#21262e;
+    --lime:#c8ff37;
+    --lime-dim:#a8db1f;
+    --ink:#eef1f3;
+    --muted:#a3acb6;
+    --line:#2e353e;
+    --red:#ff6b5e;
+    --radius:16px;
+    --maxw:980px;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--charcoal);
+    color:var(--ink);
+    font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{font-family:'Space Grotesk','Inter',sans-serif;line-height:1.1;letter-spacing:-0.02em;}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px;}
+  section{padding:78px 0;border-bottom:1px solid var(--line);}
+  section:last-of-type{border-bottom:none;}
+
+  .eyebrow{
+    display:inline-block;font-size:.78rem;font-weight:600;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--lime);margin-bottom:18px;
+  }
+
+  /* buttons */
+  .btn{
+    display:inline-block;font-family:'Space Grotesk',sans-serif;font-weight:700;
+    font-size:1.02rem;text-decoration:none;border-radius:999px;
+    padding:16px 30px;transition:transform .12s ease,box-shadow .12s ease;cursor:pointer;
+  }
+  .btn:hover{transform:translateY(-2px);}
+  .btn-primary{background:var(--lime);color:#11140f;box-shadow:0 8px 26px rgba(200,255,55,.22);}
+  .btn-primary:hover{box-shadow:0 12px 34px rgba(200,255,55,.34);}
+  .btn-ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line);}
+  .btn-ghost:hover{border-color:var(--lime);color:var(--lime);}
+  .btn-row{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-top:30px;}
+
+  /* HERO */
+  .hero{background:radial-gradient(1100px 480px at 70% -10%,rgba(200,255,55,.10),transparent 60%);padding-top:64px;}
+  .hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:46px;align-items:center;}
+  .hero h1{font-size:clamp(2.1rem,5vw,3.4rem);margin-bottom:20px;}
+  .hero h1 .hl{color:var(--lime);}
+  .hero p.sub{font-size:1.18rem;color:var(--muted);max-width:34ch;}
+  .cover-shot{
+    aspect-ratio:6/9;border-radius:14px;
+    background:
+      linear-gradient(180deg,rgba(200,255,55,.14),transparent 40%),
+      linear-gradient(145deg,#23282f,#13161a);
+    border:1px solid var(--line);
+    box-shadow:0 30px 70px rgba(0,0,0,.55),0 0 0 1px rgba(200,255,55,.06);
+    transform:rotate(3deg);
+    display:flex;flex-direction:column;justify-content:center;align-items:center;
+    text-align:center;padding:26px;position:relative;overflow:hidden;
+  }
+  .cover-shot .dotpath{position:absolute;inset:0;opacity:.5;
+    background-image:radial-gradient(var(--lime) 1px,transparent 1.4px);
+    background-size:18px 18px;mask-image:linear-gradient(125deg,#000,transparent 70%);}
+  .cover-shot .ctitle{font-family:'Space Grotesk';font-weight:700;font-size:1.9rem;color:var(--ink);z-index:1;}
+  .cover-shot .csub{color:var(--lime);font-size:.85rem;letter-spacing:.04em;margin-top:10px;z-index:1;}
+  .cover-img{
+    width:100%;max-width:340px;display:block;margin:0 auto;border-radius:14px;
+    box-shadow:0 30px 70px rgba(0,0,0,.55),0 0 0 1px rgba(200,255,55,.06);
+    transform:rotate(3deg);
+  }
+
+  /* generic two-col / stack */
+  .lead{font-size:1.45rem;font-weight:500;max-width:24ch;}
+  h2.big{font-size:clamp(1.7rem,3.6vw,2.4rem);margin-bottom:12px;}
+  .section-intro{color:var(--muted);max-width:52ch;margin-bottom:34px;}
+
+  /* benefits */
+  .benefits{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .bcard{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px 22px;}
+  .bcard .tick{color:var(--lime);font-weight:700;margin-right:8px;}
+  .bcard.full::after{content:"FULL BOOK";display:inline-block;margin-top:12px;font-size:.66rem;
+    letter-spacing:.12em;color:#11140f;background:var(--lime);padding:3px 9px;border-radius:999px;font-weight:700;}
+
+  /* preview row */
+  .preview-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:8px;}
+  .pg-fig{margin:0;}
+  .pg-fig img{width:100%;border-radius:12px;border:1px solid var(--line);
+    box-shadow:0 10px 30px rgba(0,0,0,.4);display:block;}
+  .pg-fig figcaption{color:var(--muted);font-size:.82rem;margin-top:10px;text-align:center;}
+
+  /* proof */
+  .proof{background:var(--charcoal-2);}
+  .quote{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--lime);
+    border-radius:12px;padding:22px 24px;font-size:1.05rem;}
+  .quote .who{display:block;margin-top:12px;color:var(--muted);font-size:.85rem;}
+
+  /* comparison table */
+  .cmp{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;}
+  .cmp th,.cmp td{padding:15px 18px;text-align:left;border-bottom:1px solid var(--line);font-size:.97rem;}
+  .cmp th{background:var(--charcoal-2);font-family:'Space Grotesk';}
+  .cmp th.full{color:var(--lime);}
+  .cmp tr:last-child td{border-bottom:none;}
+  .cmp td.no{color:var(--muted);}
+  .cmp td.yes{color:var(--lime);font-weight:600;}
+
+  /* CTA bands */
+  .band{background:linear-gradient(180deg,var(--charcoal-2),var(--charcoal));text-align:center;}
+  .band h2{font-size:clamp(1.8rem,4vw,2.6rem);margin-bottom:14px;}
+  .band p{color:var(--muted);max-width:46ch;margin:0 auto;}
+  .price{font-family:'Space Grotesk';font-weight:700;color:var(--lime);font-size:1.1rem;margin-top:16px;}
+
+  .free-gate{background:
+    radial-gradient(700px 300px at 50% 0,rgba(200,255,55,.08),transparent 60%),var(--charcoal);}
+  .gate-card{max-width:560px;margin:0 auto;text-align:center;background:var(--card);
+    border:1px solid var(--line);border-radius:20px;padding:40px 30px;}
+  .gate-card .adnote{color:var(--muted);font-size:.92rem;margin-top:18px;}
+  .gate-card .tiny{color:var(--muted);font-size:.78rem;margin-top:14px;}
+
+  /* faq */
+  details{background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:0 20px;margin-bottom:12px;overflow:hidden;}
+  summary{cursor:pointer;list-style:none;padding:18px 0;font-family:'Space Grotesk';font-weight:500;
+    display:flex;justify-content:space-between;align-items:center;gap:12px;}
+  summary::-webkit-details-marker{display:none;}
+  summary::after{content:"+";color:var(--lime);font-size:1.3rem;font-weight:700;}
+  details[open] summary::after{content:"–";}
+  details .ans{padding:0 0 20px;color:var(--muted);}
+
+  /* footer */
+  footer{background:var(--charcoal-2);text-align:center;color:var(--muted);font-size:.86rem;}
+  footer a{color:var(--muted);text-decoration:none;border-bottom:1px solid var(--line);}
+  footer a:hover{color:var(--lime);border-color:var(--lime);}
+  .disclaimer{font-size:.74rem;max-width:60ch;margin:14px auto 0;opacity:.8;}
+
+  @media (max-width:760px){
+    section{padding:56px 0;}
+    .hero-grid{grid-template-columns:1fr;gap:34px;}
+    .cover-shot{transform:none;max-width:280px;margin:0 auto;}
+    .benefits{grid-template-columns:1fr;}
+    .preview-row{grid-template-columns:1fr 1fr;}
+    .btn-row{justify-content:flex-start;}
+  }
+</style>
+</head>
+<body>
+
+<!-- 1. HERO -->
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow">No product · no money to start · no audience</span>
+      <h1>I went from <span class="hl">0 followers</span> to getting paid by ads.</h1>
+      <p class="sub">Here's the exact playbook I'd hand my younger self: pick a niche that's already hot, blow up on X, and turn that attention into ad money.</p>
+      <div class="btn-row">
+        <a class="btn btn-primary" href="https://payhip.com/buy?link=aJTdq">Get the full book →</a>
+        <a class="btn btn-ghost" href="#free">Or grab the free lite version</a>
+      </div>
+    </div>
+    <div>
+      <img class="cover-img" src="images/new_front_cover.png" alt="Traffic to Treasure — book cover" />
+    </div>
+  </div>
+</section>
+
+<!-- 2. PROBLEM / HOOK -->
+<section>
+  <div class="wrap">
+    <span class="eyebrow">If this sounds familiar</span>
+    <p class="lead">You keep hearing "just post and stay consistent." Nobody shows you the part where it actually pays.</p>
+    <p class="section-intro" style="margin-top:18px;">So you grind for weeks, the follower count crawls, and the money never shows up. The piece everyone skips isn't the posting. It's what you point that attention at.</p>
+  </div>
+</section>
+
+<!-- 3. BENEFITS -->
+<section>
+  <div class="wrap">
+    <span class="eyebrow">What's inside</span>
+    <h2 class="big">The whole loop, start to finish</h2>
+    <p class="section-intro">Real steps, not vibes. Here's what you walk away knowing how to do.</p>
+    <div class="benefits">
+      <div class="bcard"><span class="tick">✓</span>Pick a niche that's already on fire (5 proven ones, with examples)</div>
+      <div class="bcard"><span class="tick">✓</span>The reply method that got me my first 1,000 followers</div>
+      <div class="bcard"><span class="tick">✓</span>The exact free site setup — built in a weekend, no code</div>
+      <div class="bcard full"><span class="tick">✓</span>How the ads actually pay, and the setup that bumps your payout tier</div>
+      <div class="bcard full"><span class="tick">✓</span>The clickbait + clean-link traffic system that feeds it all</div>
+      <div class="bcard full"><span class="tick">✓</span>How to stack a second site and compound the whole thing</div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. COVER + INTERIOR PREVIEW -->
+<section>
+  <div class="wrap">
+    <span class="eyebrow">A look inside</span>
+    <h2 class="big">It's short on purpose</h2>
+    <p class="section-intro">30-ish pages you'll actually finish. Every chapter ends with one thing to go do.</p>
+    <div class="preview-row">
+      <figure class="pg-fig"><img src="images/ch1_opener.png" alt="The loop on one page" /><figcaption>The loop on one page</figcaption></figure>
+      <figure class="pg-fig"><img src="images/ch3_viral_thread.png" alt="Anatomy of a viral thread" /><figcaption>Anatomy of a viral thread</figcaption></figure>
+      <figure class="pg-fig"><img src="images/ch2_five_niches.png" alt="The 5 hot niches" /><figcaption>The 5 hot niches</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<!-- 5. PROOF -->
+<section class="proof">
+  <div class="wrap">
+    <span class="eyebrow">Why I wrote this</span>
+    <div class="quote">
+      I'm not a guru and I'm not selling a dream. I just got tired of watching people post into the void and quit at day 30 — right before the part that pays. So I wrote down the exact loop, including the boring setup steps everyone skips.
+      <span class="who">— why I wrote this</span>
+    </div>
+  </div>
+</section>
+
+<!-- 6. FULL vs LITE -->
+<section>
+  <div class="wrap">
+    <span class="eyebrow">Free vs full</span>
+    <h2 class="big">What's in each version</h2>
+    <p class="section-intro">The free lite book gets you moving. The full book closes the loop and shows you the money part.</p>
+    <table class="cmp">
+      <tr><th>What you get</th><th>Free lite</th><th class="full">Full book</th></tr>
+      <tr><td>Pick your niche + the X growth method</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
+      <tr><td>Build your free site</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
+      <tr><td>The ad setup that actually pays (Monetag)</td><td class="no">—</td><td class="yes">Yes</td></tr>
+      <tr><td>The link that unlocks the higher payout tier</td><td class="no">—</td><td class="yes">Yes</td></tr>
+      <tr><td>Traffic + clean-link system</td><td class="no">—</td><td class="yes">Yes</td></tr>
+      <tr><td>Stacking + scaling to more income</td><td class="no">—</td><td class="yes">Yes</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- 7. PRIMARY CTA -->
+<section class="band">
+  <div class="wrap">
+    <h2>Get the full playbook</h2>
+    <p>Instant download after checkout. Read it tonight, start tomorrow.</p>
+    <div class="price">One-time — yours forever</div>
+    <div class="btn-row" style="justify-content:center;">
+      <a class="btn btn-primary" href="https://payhip.com/buy?link=aJTdq">Buy the full book →</a>
+    </div>
+  </div>
+</section>
+
+<!-- 8. FREE DOWNLOAD GATE -->
+<section class="free-gate" id="free">
+  <div class="wrap">
+    <div class="gate-card">
+      <span class="eyebrow">Not ready to buy?</span>
+      <h2 class="big">Grab the free lite version</h2>
+      <p style="color:var(--muted);">Get the first chapters free. Just watch one quick ad on the download page — that's what keeps it free.</p>
+      <div class="btn-row" style="justify-content:center;">
+        <a class="btn btn-primary" href="https://www.up-4ever.net/55zofzcrdiin">Download the free lite book</a>
+      </div>
+      <p class="adnote">One short ad keeps the lite version free. Then it's yours.</p>
+      <p class="tiny">Want the rest — the ad setup, the payout-tier link, the traffic system? The full book's right above.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 9. FAQ -->
+<section>
+  <div class="wrap">
+    <span class="eyebrow">Quick answers</span>
+    <h2 class="big">Before you ask</h2>
+    <div style="margin-top:26px;">
+      <details><summary>What's the difference between the free and full version?</summary><div class="ans">The free lite book covers picking your niche and growing on X. The full book adds the part that makes money — the ad setup, the payout-tier link, the traffic system, and how to scale.</div></details>
+      <details><summary>Is it really free?</summary><div class="ans">Yes. The lite version costs nothing — you just watch one short ad on the download page.</div></details>
+      <details><summary>Do I need money to start?</summary><div class="ans">No. Every tool in the playbook has a free tier. The whole point is starting from zero.</div></details>
+      <details><summary>Do I need followers already?</summary><div class="ans">No. The book opens at zero followers and the first real chapter is how to get your first thousand.</div></details>
+      <details><summary>How long does this take?</summary><div class="ans">The reading is one evening. The growth is the slow part — most people quit at day 30. Stick past that and it compounds.</div></details>
+    </div>
+  </div>
+</section>
+
+<!-- 10. FINAL CTA -->
+<section class="band">
+  <div class="wrap">
+    <h2>Start from zero. Get paid.</h2>
+    <p>Buy the full book, or grab the free version and see for yourself.</p>
+    <div class="btn-row" style="justify-content:center;">
+      <a class="btn btn-primary" href="https://payhip.com/buy?link=aJTdq">Get the full book →</a>
+      <a class="btn btn-ghost" href="#free">Free lite version</a>
+    </div>
+  </div>
+</section>
+
+<!-- 11. FOOTER -->
+<footer>
+  <div class="wrap">
+    <p><strong style="color:var(--ink);font-family:'Space Grotesk';">ZERO TO PAID</strong></p>
+    <p style="margin-top:8px;"><a href="mailto:cannonjmarc@gmail.com">Contact</a></p>
+    <p class="disclaimer">Results aren't guaranteed and depend on your own effort and consistency. This isn't financial advice — it's what worked for me, shared honestly.</p>
+    <p style="margin-top:14px;opacity:.6;">© 2026 Zero to Paid</p>
+  </div>
+</footer>
+
+</body>
+</html>
