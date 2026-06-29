@@ -648,11 +648,13 @@ import * as THREE from 'https://esm.sh/three@0.160.0';
   var canvas = document.getElementById('bg-canvas');
   if (!canvas) return;
 
-  var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var isMobile = window.matchMedia('(max-width: 760px)').matches ||
-                 ('ontouchstart' in window && window.innerWidth < 900);
-  // On mobile / reduced-motion we don't run WebGL at all (perf + respect).
-  if (prefersReduced || isMobile) { canvas.style.display = 'none'; return; }
+  // Reduced-motion users get a CALM book (no spin/bob/spotlight chase) rather than no book.
+  var calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Only skip WebGL entirely on genuine small touch-only devices (real phones/tablets).
+  var coarseOnly = window.matchMedia('(pointer: coarse)').matches &&
+                   !window.matchMedia('(pointer: fine)').matches;
+  var isMobile = window.matchMedia('(max-width: 760px)').matches && coarseOnly;
+  if (isMobile) { canvas.style.display = 'none'; return; }
 
   var renderer;
   try {
@@ -666,74 +668,120 @@ import * as THREE from 'https://esm.sh/three@0.160.0';
   var camera = new THREE.PerspectiveCamera(38, window.innerWidth / window.innerHeight, 0.1, 100);
   camera.position.z = 6;
 
-  // ---- Lighting: dim by default; the cursor spotlight does the "flashlight" reveal ----
-  scene.add(new THREE.AmbientLight(0xffffff, 0.32));               // low base = dark until lit
-  var fill = new THREE.DirectionalLight(0xaab4c0, 0.35);
-  fill.position.set(-3, 2, 4); scene.add(fill);
-  var rim = new THREE.DirectionalLight(0xc8ff37, 0.4);            // lime brand rim
-  rim.position.set(-4, -1, 2); scene.add(rim);
+  // ---- Lighting: cover clearly visible by default; spotlight ADDS a warm reveal ----
+  scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+  var key = new THREE.DirectionalLight(0xffffff, 1.25);          // strong key on the cover face
+  key.position.set(2.5, 3.5, 6); scene.add(key);
+  var fill = new THREE.DirectionalLight(0xaeb8c4, 0.45);
+  fill.position.set(-4, 1.5, 3); scene.add(fill);
+  var rim = new THREE.DirectionalLight(0xc8ff37, 0.55);          // lime brand rim from behind
+  rim.position.set(-3, -2, -4); scene.add(rim);
 
   // Cursor-tracking spotlight — warm, soft-edged, follows the mouse like a flashlight.
-  var spot = new THREE.SpotLight(0xfff1d0, 18, 16, Math.PI / 6, 0.65, 1.4);
-  spot.position.set(0, 0, 5);
+  var spot = new THREE.SpotLight(0xfff1d0, 18, 18, Math.PI / 6, 0.7, 1.3);
+  spot.position.set(0, 0, 6);
   scene.add(spot);
   var spotTarget = new THREE.Object3D();
   scene.add(spotTarget);
   spot.target = spotTarget;
 
-  // ---- Low-poly book: a Group of cover slabs + spine + pages -----------
+  // ---- A hardcover book: portrait covers that overhang a stacked page block --------
+  // Real books read as: thin covers slightly LARGER than the pages, a rounded spine on
+  // the left, and a striped paper block on the other three edges. Depth is shallow.
   var book = new THREE.Group();
-  var W = 2.4, H = 2.4, COVER_T = 0.10, GAP = 0.30; // square cover (cover.webp is 1:1)
+  var PW = 1.9, PH = 2.66;            // page width/height (portrait — a real book ratio)
+  var COVER_OH = 0.07;               // cover overhang past the pages on 3 sides
+  var CW = PW + COVER_OH, CH = PH + COVER_OH * 2;
+  var COVER_T = 0.07;               // cover board thickness
+  var PAGE_D = 0.42;                // thickness of the page stack (the book's depth)
+  var halfD = PAGE_D / 2 + COVER_T / 2;
 
-  var coverMat = new THREE.MeshStandardMaterial({ color: 0x1b1f25, roughness: 0.55, metalness: 0.08 });
-  var frontMat = new THREE.MeshStandardMaterial({ color: 0x15181c, roughness: 0.45, metalness: 0.05 });
-  var pageMat  = new THREE.MeshStandardMaterial({ color: 0xece6d6, roughness: 0.9 });   // cream page block
-  var spineMat = new THREE.MeshStandardMaterial({ color: 0x121519, roughness: 0.7 });
+  // procedural striped texture for the page edges (stacked-paper look)
+  function makePageTexture(horizontal) {
+    var c = document.createElement('canvas'); c.width = 64; c.height = 256;
+    var g = c.getContext('2d');
+    g.fillStyle = '#efe9da'; g.fillRect(0, 0, c.width, c.height);
+    g.strokeStyle = 'rgba(120,110,95,0.35)'; g.lineWidth = 1;
+    for (var i = 2; i < c.height; i += 3) { g.beginPath(); g.moveTo(0, i + 0.5); g.lineTo(c.width, i + 0.5); g.stroke(); }
+    var tex = new THREE.CanvasTexture(c);
+    if ('colorSpace' in tex) tex.colorSpace = THREE.SRGBColorSpace;
+    if (horizontal) tex.rotation = Math.PI / 2, tex.center.set(0.5, 0.5);
+    return tex;
+  }
+  var edgeTexV = makePageTexture(false);
+  var edgeTexH = makePageTexture(true);
 
-  // Front cover (the textured face is its +z side). Box order: +x,-x,+y,-y,+z,-z
-  var frontGeo = new THREE.BoxGeometry(W, H, COVER_T);
-  var front = new THREE.Mesh(frontGeo, [coverMat, coverMat, coverMat, coverMat, frontMat, coverMat]);
-  front.position.z = GAP / 2;
+  var coverMat = new THREE.MeshStandardMaterial({ color: 0x14171b, roughness: 0.5, metalness: 0.12 });
+  var frontMat = new THREE.MeshStandardMaterial({ color: 0x1a1d22, roughness: 0.4, metalness: 0.06 });
+  var spineMat = new THREE.MeshStandardMaterial({ color: 0x0f1215, roughness: 0.55, metalness: 0.1 });
+
+  // Page block (the paper). Box face order: +x,-x,+y,-y,+z,-z
+  var foreMat = new THREE.MeshStandardMaterial({ map: edgeTexV, color: 0xffffff, roughness: 0.95 });  // right fore-edge
+  var topMat  = new THREE.MeshStandardMaterial({ map: edgeTexH, color: 0xffffff, roughness: 0.95 });
+  var botMat  = new THREE.MeshStandardMaterial({ map: edgeTexH, color: 0xffffff, roughness: 0.95 });
+  var hiddenMat = new THREE.MeshStandardMaterial({ color: 0xe8e1d0, roughness: 0.95 });
+  var pages = new THREE.Mesh(
+    new THREE.BoxGeometry(PW, PH, PAGE_D),
+    [ foreMat, hiddenMat, topMat, botMat, hiddenMat, hiddenMat ]
+  );
+  book.add(pages);
+
+  // Front cover (textured). Slightly larger than the page block and pushed forward.
+  var front = new THREE.Mesh(
+    new THREE.BoxGeometry(CW, CH, COVER_T),
+    [ coverMat, coverMat, coverMat, coverMat, frontMat, coverMat ]
+  );
+  front.position.z = halfD;
+  front.position.x = COVER_OH / 2;        // overhang on the fore-edge side
   book.add(front);
 
   // Back cover
-  var back = new THREE.Mesh(new THREE.BoxGeometry(W, H, COVER_T), coverMat);
-  back.position.z = -GAP / 2;
+  var back = new THREE.Mesh(new THREE.BoxGeometry(CW, CH, COVER_T), coverMat);
+  back.position.z = -halfD;
+  back.position.x = COVER_OH / 2;
   book.add(back);
 
-  // Page block between the covers (slightly inset so it reads as paper)
-  var pages = new THREE.Mesh(new THREE.BoxGeometry(W - 0.10, H - 0.10, GAP - COVER_T), pageMat);
-  book.add(pages);
-
-  // Spine on the left edge
-  var spine = new THREE.Mesh(new THREE.BoxGeometry(0.12, H + 0.02, GAP + COVER_T), spineMat);
-  spine.position.x = -W / 2 - 0.02;
+  // Spine: a slim slab down the left edge that joins the two covers (full depth + a touch more).
+  var SPINE_W = 0.10;
+  var spine = new THREE.Mesh(
+    new THREE.BoxGeometry(SPINE_W, CH, PAGE_D + COVER_T * 2),
+    spineMat
+  );
+  spine.position.x = -CW / 2 - SPINE_W / 2 + COVER_OH / 2;
   book.add(spine);
 
-  book.rotation.x = -0.12;
-  book.rotation.y = 0.55;
+  var allMats = [coverMat, frontMat, spineMat, foreMat, topMat, botMat, hiddenMat];
+
+  book.rotation.x = -0.08;
+  book.rotation.y = -0.5;                   // angled so the spine + pages show on the left
   scene.add(book);
 
-  var allMats = [coverMat, frontMat, pageMat, spineMat];
-
-  // ---- Texture the front cover from the existing asset ----------------
-  var loader = new THREE.TextureLoader();
-  loader.load(
-    'images/cover.webp',
-    function (tex) {
-      if ('colorSpace' in tex) tex.colorSpace = THREE.SRGBColorSpace;
-      tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
-      frontMat.map = tex;
-      frontMat.color.set(0xffffff);
-      frontMat.needsUpdate = true;
-      // Static fallback image can fade out now that the 3D cover is real.
-      document.body.classList.add('book3d-ready');
-    },
-    undefined,
-    function () { /* texture failed — keep the static <img>, hide canvas to avoid a blank book */
-      canvas.style.display = 'none';
+  // ---- Texture the front cover from the existing asset --------------------------
+  // Load via a plain <img> (the browser decodes webp reliably — it's the same source
+  // the static fallback uses) and wrap it in a Texture. If it fails, the book still
+  // renders with its brand colour — we NEVER hide the canvas over a missing texture.
+  var coverImg = new Image();
+  coverImg.onload = function () {
+    var tex = new THREE.Texture(coverImg);
+    if ('colorSpace' in tex) tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    // "cover"-fit the square art onto the portrait face (center-crop, no stretch)
+    var faceAspect = CW / CH;                 // < 1 (portrait)
+    var imgAspect = coverImg.width / coverImg.height; // ~1 (square)
+    if (imgAspect > faceAspect) {             // image wider than face → crop sides
+      tex.repeat.x = faceAspect / imgAspect; tex.offset.x = (1 - tex.repeat.x) / 2;
+    } else {                                  // crop top/bottom
+      tex.repeat.y = imgAspect / faceAspect; tex.offset.y = (1 - tex.repeat.y) / 2;
     }
-  );
+    tex.needsUpdate = true;
+    frontMat.map = tex;
+    frontMat.color.set(0xffffff);
+    frontMat.needsUpdate = true;
+  };
+  coverImg.onerror = function () {
+    frontMat.color.set(0x232a18);             // branded fallback so the book still reads well
+  };
+  coverImg.src = 'images/cover.webp';
 
   // ---- Map the hero's right column to a world position so the 3D book
   //      sits where the fallback image was (no visual jump). --------------
@@ -742,11 +790,16 @@ import * as THREE from 'https://esm.sh/three@0.160.0';
     var hv = document.getElementById('heroVisual');
     if (!hv) return;
     var r = hv.getBoundingClientRect();
-    // convert the element's screen centre to a world X at z=0
-    var cx = (r.left + r.width / 2) / window.innerWidth;   // 0..1
-    var ndcX = cx * 2 - 1;
-    var halfW = Math.tan((camera.fov * Math.PI / 180) / 2) * camera.position.z * camera.aspect;
-    baseX = ndcX * halfW;
+    var halfH = Math.tan((camera.fov * Math.PI / 180) / 2) * camera.position.z; // world half-height at z=0
+    var halfW = halfH * camera.aspect;
+    // screen centre of the hero-visual → world coords (note: screen Y is inverted)
+    var cx = (r.left + r.width / 2) / window.innerWidth;    // 0..1
+    var cy = (r.top + r.height / 2) / window.innerHeight;   // 0..1
+    baseX = (cx * 2 - 1) * halfW;
+    baseY = -(cy * 2 - 1) * halfH;
+    // scale the book so its ~2.4 world-unit width roughly matches the element's width
+    var worldPerPx = (halfW * 2) / window.innerWidth;
+    baseScale = Math.min(Math.max((r.width * worldPerPx) / 2.6, 0.7), 1.5);
   }
 
   // ---- Interaction: parallax tilt + cursor spotlight ------------------
@@ -759,23 +812,13 @@ import * as THREE from 'https://esm.sh/three@0.160.0';
     targetTiltX = ny * 0.20;
   }, { passive: true });
 
-  // ---- Scroll choreography -------------------------------------------
-  var scrollP = 0, returnP = 0;
+  // ---- Scroll choreography: book lives ONLY in the hero. It slides away as you
+  //      scroll down and never returns elsewhere on the page. ------------------
+  var scrollP = 0;
   function updateScroll() {
     var hero = document.querySelector('.hero');
     var heroH = hero ? hero.offsetHeight : window.innerHeight;
-    scrollP = Math.min(window.scrollY / (heroH * 0.85), 1);   // 0 at top → 1 leaving hero
-
-    // book returns as the final CTA band scrolls into view
-    var fin = document.getElementById('finalCta');
-    returnP = 0;
-    if (fin) {
-      var fr = fin.getBoundingClientRect();
-      var vh = window.innerHeight;
-      if (fr.top < vh && fr.bottom > 0) {
-        returnP = Math.min(Math.max((vh - fr.top) / (vh * 0.9), 0), 1);
-      }
-    }
+    scrollP = Math.min(window.scrollY / (heroH * 0.85), 1);   // 0 at top → 1 once hero is gone
   }
 
   // ---- Resize ---------------------------------------------------------
@@ -800,40 +843,56 @@ import * as THREE from 'https://esm.sh/three@0.160.0';
   });
 
   // ---- Animation loop -------------------------------------------------
-  var t = 0;
+  var t = 0, firstFrame = true;
+  // Base orientation: cover angled toward the viewer so the spine + pages read on the left.
+  var BASE_RY = -0.5, BASE_RX = -0.08;
   function loop() {
     if (!running) return;
     requestAnimationFrame(loop);
-    t += 0.01;
+    if (!calm) t += 0.01;
 
-    book.rotation.y += 0.0040;                                   // slow continuous spin
-    book.rotation.x += (targetTiltX - 0.12 - book.rotation.x) * 0.06;
-    book.rotation.z += ((targetTiltY * 0.10) - book.rotation.z) * 0.06;
+    // Gentle sway (NOT a full spin) so the cover always faces the viewer + mouse parallax.
+    var swayY = calm ? 0 : Math.sin(t * 0.7) * 0.18;
+    var targetRY = BASE_RY + swayY + (calm ? 0 : targetTiltY * 0.35);
+    var targetRX = BASE_RX + (calm ? 0 : targetTiltX * 0.22);
+    book.rotation.y += (targetRY - book.rotation.y) * 0.06;
+    book.rotation.x += (targetRX - book.rotation.x) * 0.06;
 
-    var bob = Math.sin(t) * 0.10;
+    var bob = calm ? 0 : Math.sin(t * 0.9) * 0.07;
 
-    // Blend two states: hero (left/centre, big) → scrolled-out (right, small, faded),
-    // then a partial return near the final CTA.
-    var leave = scrollP * (1 - returnP);                        // how "gone" it is
-    var slide = leave * 3.4;
-    var scl = baseScale * (1 - leave * 0.45) * (0.9 + returnP * 0.1);
+    // Hero state → scrolled-out (slides right, shrinks, fades). Never returns.
+    var leave = scrollP;
+    var slide = leave * 3.6;
+    var scl = baseScale * (1 - leave * 0.4);
 
-    book.position.x = baseX + targetTiltY * 0.5 + slide;
-    book.position.y = baseY + bob - leave * 0.5 + returnP * 0.15;
+    book.position.x = baseX + (calm ? 0 : targetTiltY * 0.4) + slide;
+    book.position.y = baseY + bob - leave * 0.5;
     book.scale.setScalar(scl);
 
-    var opacity = Math.max(1 - leave, returnP * 0.95);
+    var opacity = 1 - leave;
     allMats.forEach(function (m) { m.transparent = true; m.opacity = opacity; });
 
-    // Move the spotlight to follow the cursor in world space (the "flashlight").
-    spot.position.x = mx * 4.2;
-    spot.position.y = -my * 3.2;
+    // Move the spotlight to follow the cursor (the "flashlight" reveal). In calm mode it
+    // stays put and just lights the book steadily.
+    if (!calm) {
+      spot.position.x = mx * 4.2;
+      spot.position.y = -my * 3.2;
+      spotTarget.position.set(book.position.x + mx * 1.2, book.position.y - my * 0.8, 0);
+    } else {
+      spot.position.x = 0; spot.position.y = 1;
+      spotTarget.position.set(book.position.x, book.position.y, 0);
+    }
     spot.position.z = 5;
-    spotTarget.position.set(book.position.x + mx * 1.2, book.position.y - my * 0.8, 0);
-    spot.intensity = 18 * opacity;
+    spot.intensity = 22 * opacity;
 
     if (opacity <= 0.02) { renderer.clear(); return; }          // nothing visible → skip draw
     renderer.render(scene, camera);
+
+    // After the very first successful render, fade the static fallback <img> out.
+    if (firstFrame) {
+      firstFrame = false;
+      document.body.classList.add('book3d-ready');
+    }
   }
   requestAnimationFrame(loop);
 })();
