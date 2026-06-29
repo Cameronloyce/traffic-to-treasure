@@ -65,12 +65,27 @@
   .hero h1{font-size:clamp(2.1rem,5vw,3.4rem);margin-bottom:20px;}
   .hero h1 .hl{color:var(--lime);}
   .hero p.sub{font-size:1.18rem;color:var(--muted);max-width:34ch;}
-  .cover-img{
-    width:100%;max-width:340px;height:auto;display:block;margin:0 auto;border-radius:16px;
+  .cover-shot{
+    aspect-ratio:6/9;border-radius:14px;
+    background:
+      linear-gradient(180deg,rgba(200,255,55,.14),transparent 40%),
+      linear-gradient(145deg,#23282f,#13161a);
+    border:1px solid var(--line);
     box-shadow:0 30px 70px rgba(0,0,0,.55),0 0 0 1px rgba(200,255,55,.06);
-    transform:rotate(2deg);transition:transform .35s ease;
+    transform:rotate(3deg);
+    display:flex;flex-direction:column;justify-content:center;align-items:center;
+    text-align:center;padding:26px;position:relative;overflow:hidden;
   }
-  .cover-img:hover{transform:rotate(0deg) scale(1.02);}
+  .cover-shot .dotpath{position:absolute;inset:0;opacity:.5;
+    background-image:radial-gradient(var(--lime) 1px,transparent 1.4px);
+    background-size:18px 18px;mask-image:linear-gradient(125deg,#000,transparent 70%);}
+  .cover-shot .ctitle{font-family:'Space Grotesk';font-weight:700;font-size:1.9rem;color:var(--ink);z-index:1;}
+  .cover-shot .csub{color:var(--lime);font-size:.85rem;letter-spacing:.04em;margin-top:10px;z-index:1;}
+  .cover-img{
+    width:100%;max-width:340px;display:block;margin:0 auto;border-radius:14px;
+    box-shadow:0 30px 70px rgba(0,0,0,.55),0 0 0 1px rgba(200,255,55,.06);
+    transform:rotate(3deg);
+  }
 
   /* generic two-col / stack */
   .lead{font-size:1.45rem;font-weight:500;max-width:24ch;}
@@ -115,8 +130,6 @@
   .dealbar .strike{opacity:.55;font-weight:500;margin:0 2px;}
   .dealbar .pulse{display:inline-block;width:8px;height:8px;border-radius:50%;background:#11140f;
     margin-right:8px;vertical-align:middle;animation:blink 1.3s infinite;}
-  .dealbar .db-timer b{font-variant-numeric:tabular-nums;}
-  @media (max-width:560px){ .dealbar .db-timer{display:block;margin-top:2px;} }
   @keyframes blink{0%,100%{opacity:1;}50%{opacity:.25;}}
 
   /* price atoms */
@@ -186,23 +199,6 @@
     font-size:.82rem;color:var(--ink);font-weight:500;}
   .skipbadge .bolt{color:var(--lime);font-size:1rem;}
 
-  /* sticky mobile buy bar */
-  .mobilebar{
-    position:fixed;left:0;right:0;bottom:0;z-index:60;
-    display:none;align-items:center;gap:12px;
-    background:rgba(29,33,39,.92);backdrop-filter:blur(10px);
-    border-top:1px solid var(--line);padding:10px 14px;
-    transform:translateY(110%);transition:transform .28s ease;
-    padding-bottom:calc(10px + env(safe-area-inset-bottom));
-  }
-  .mobilebar.show{transform:translateY(0);}
-  .mobilebar .mb-price{flex:1;font-family:'Space Grotesk';line-height:1.15;}
-  .mobilebar .mb-price .mb-now{color:var(--lime);font-weight:700;font-size:1.25rem;}
-  .mobilebar .mb-price .mb-was{color:var(--muted);text-decoration:line-through;font-size:.85rem;margin-left:6px;}
-  .mobilebar .mb-price small{display:block;color:var(--muted);font-size:.72rem;font-weight:400;font-family:'Inter';}
-  .mobilebar .btn{padding:13px 22px;font-size:.95rem;white-space:nowrap;}
-  @media (max-width:760px){ .mobilebar{display:flex;} }
-
   /* exit-intent popup */
   .exit-overlay{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.72);
     display:none;align-items:center;justify-content:center;padding:22px;}
@@ -232,22 +228,10 @@
   footer a:hover{color:var(--lime);border-color:var(--lime);}
   .disclaimer{font-size:.74rem;max-width:60ch;margin:14px auto 0;opacity:.8;}
 
-  /* conversion-safe scroll reveal */
-  .reveal{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s ease;}
-  .reveal.in{opacity:1;transform:none;}
-
-  /* respect users who don't want motion */
-  @media (prefers-reduced-motion:reduce){
-    *{animation-duration:.001ms!important;animation-iteration-count:1!important;
-      transition-duration:.001ms!important;scroll-behavior:auto!important;}
-    .reveal{opacity:1;transform:none;}
-    .dealbar .pulse{animation:none;}
-  }
-
   @media (max-width:760px){
     section{padding:56px 0;}
     .hero-grid{grid-template-columns:1fr;gap:34px;}
-    .cover-img{transform:none;max-width:240px;}
+    .cover-shot{transform:none;max-width:280px;margin:0 auto;}
     .benefits{grid-template-columns:1fr;}
     .preview-row{grid-template-columns:1fr 1fr;}
     .btn-row{justify-content:flex-start;}
@@ -261,8 +245,7 @@
 
 <!-- DEAL BAR -->
 <div class="dealbar">
-  <span class="pulse"></span>Launch deal — full book <span class="strike">$5.99</span> now just $3.99
-  <span class="db-timer">· ends in <b id="dealClock">48:00:00</b></span>
+  <span class="pulse"></span>Launch deal — full book <span class="strike">$5.99</span> now just $3.99 · or read the free version below
 </div>
 
 <!-- 1. HERO -->
@@ -283,7 +266,7 @@
       <p style="color:var(--muted);font-size:.85rem;margin-top:14px;">Skint right now? Grab the <a href="#free" style="color:var(--lime);text-decoration:none;border-bottom:1px solid var(--line);">free lite version</a> — no card needed.</p>
     </div>
     <div>
-      <img class="cover-img" src="images/cover.webp" width="680" height="680" fetchpriority="high" alt="Traffic to Treasure — book cover" />
+      <img class="cover-img" src="images/new_front_cover.png" alt="Traffic to Treasure — book cover" />
     </div>
   </div>
 </section>
@@ -321,9 +304,9 @@
     <h2 class="big">It's short on purpose</h2>
     <p class="section-intro">30-ish pages you'll actually finish. Every chapter ends with one thing to go do.</p>
     <div class="preview-row">
-      <figure class="pg-fig"><img src="images/ch1_opener.webp" width="600" height="600" loading="lazy" decoding="async" alt="The loop on one page" /><figcaption>The loop on one page</figcaption></figure>
-      <figure class="pg-fig"><img src="images/ch3_viral_thread.webp" width="600" height="600" loading="lazy" decoding="async" alt="Anatomy of a viral thread" /><figcaption>Anatomy of a viral thread</figcaption></figure>
-      <figure class="pg-fig"><img src="images/ch2_five_niches.webp" width="600" height="600" loading="lazy" decoding="async" alt="The 5 hot niches" /><figcaption>The 5 hot niches</figcaption></figure>
+      <figure class="pg-fig"><img src="images/ch1_opener.png" alt="The loop on one page" /><figcaption>The loop on one page</figcaption></figure>
+      <figure class="pg-fig"><img src="images/ch3_viral_thread.png" alt="Anatomy of a viral thread" /><figcaption>Anatomy of a viral thread</figcaption></figure>
+      <figure class="pg-fig"><img src="images/ch2_five_niches.png" alt="The 5 hot niches" /><figcaption>The 5 hot niches</figcaption></figure>
     </div>
   </div>
 </section>
@@ -376,11 +359,11 @@
         <a class="btn btn-primary" href="https://payhip.com/buy?link=aJTdq">Lock in $3.99 →</a>
       </div>
       <div class="skipbadge"><span class="bolt">⚡</span> Skip the Up4Ever ads &amp; get instant access</div>
-      <p class="urgency"><b>Heads up:</b> launch price ends in <b id="dealClock2" style="color:var(--lime);font-variant-numeric:tabular-nums;">48:00:00</b> — then back to $5.99.</p>
+      <p class="urgency"><b>Heads up:</b> this is the launch price. It goes back to $5.99 soon.</p>
     </div>
 
     <div class="author">
-      <img src="images/cameron.webp" width="120" height="120" loading="lazy" decoding="async" alt="Cameron Loyce" />
+      <img src="images/cameron.png" alt="Cameron Loyce" />
       <p class="atext">"I use Up4Ever to <b>teach</b> you the ad model — but Payhip to <b>serve</b> you. The paid version is instant, clean, and lands straight in your inbox. No fake buttons, no countdowns." <br>— <b>Cameron Loyce</b></p>
     </div>
 
@@ -401,7 +384,7 @@
       </div>
 
       <div class="author">
-        <img src="images/cameron.webp" width="120" height="120" loading="lazy" decoding="async" alt="Cameron Loyce" />
+        <img src="images/cameron.png" alt="Cameron Loyce" />
         <p class="atext">"I'm <b>Cameron</b>. I host the free version on Up4Ever on purpose — to show you how ad revenue works in the wild. If the ads look scary, that's the point. Trust the process and you'll know exactly how to navigate it."</p>
       </div>
 
@@ -471,15 +454,6 @@
   </div>
 </footer>
 
-<!-- STICKY MOBILE BUY BAR -->
-<div class="mobilebar" id="mobileBar">
-  <div class="mb-price">
-    <span class="mb-now">$3.99</span><span class="mb-was">$5.99</span>
-    <small>Full book · instant PDF</small>
-  </div>
-  <a class="btn btn-primary" href="https://payhip.com/buy?link=aJTdq">Get it →</a>
-</div>
-
 <!-- EXIT-INTENT UPSELL -->
 <div class="exit-overlay" id="exitPopup" role="dialog" aria-modal="true">
   <div class="exit-modal">
@@ -496,100 +470,33 @@
 
 <script>
 (function(){
-  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  /* ---------- 1. Honest per-visitor launch countdown (48h from first visit) ---------- */
-  var WINDOW_MS = 48 * 60 * 60 * 1000;
-  var KEY = 'z2p_deal_end';
-  var end = parseInt(localStorage.getItem(KEY), 10);
-  if (!end || isNaN(end) || end < Date.now()) {
-    end = Date.now() + WINDOW_MS;
-    localStorage.setItem(KEY, String(end));
-  }
-  var c1 = document.getElementById('dealClock');
-  var c2 = document.getElementById('dealClock2');
-  function pad(n){ return (n < 10 ? '0' : '') + n; }
-  function tick(){
-    var ms = end - Date.now();
-    if (ms <= 0) ms = 0;
-    var h = Math.floor(ms / 3600000);
-    var m = Math.floor((ms % 3600000) / 60000);
-    var s = Math.floor((ms % 60000) / 1000);
-    var txt = pad(h) + ':' + pad(m) + ':' + pad(s);
-    if (c1) c1.textContent = txt;
-    if (c2) c2.textContent = txt;
-  }
-  tick();
-  setInterval(tick, 1000);
-
-  /* ---------- 2. Sticky mobile buy bar: show after hero, hide over CTA sections ---------- */
-  var bar = document.getElementById('mobileBar');
-  if (bar) {
-    var heroEl = document.querySelector('.hero');
-    var bands = [].slice.call(document.querySelectorAll('.band, #free'));
-    var overCTA = false;
-    if ('IntersectionObserver' in window) {
-      // hide the bar whenever a CTA section (band / free gate) is on screen — it has its own buttons
-      var ctaObs = new IntersectionObserver(function(entries){
-        overCTA = entries.some(function(e){ return e.isIntersecting; }) ||
-                  bands.some(function(b){
-                    var r = b.getBoundingClientRect();
-                    return r.top < window.innerHeight * 0.8 && r.bottom > window.innerHeight * 0.2;
-                  });
-        update();
-      }, {threshold:0.2});
-      bands.forEach(function(b){ ctaObs.observe(b); });
-    }
-    function pastHero(){
-      if (!heroEl) return window.scrollY > 400;
-      return window.scrollY > heroEl.offsetTop + heroEl.offsetHeight - 80;
-    }
-    function update(){
-      if (pastHero() && !overCTA) bar.classList.add('show');
-      else bar.classList.remove('show');
-    }
-    window.addEventListener('scroll', update, {passive:true});
-    window.addEventListener('resize', update, {passive:true});
-    update();
-  }
-
-  /* ---------- 3. Scroll reveal (skipped entirely if reduced motion) ---------- */
-  if (!reduce && 'IntersectionObserver' in window) {
-    var targets = document.querySelectorAll(
-      'section .wrap > h2, .bcard, .pg-fig, .quote, .deal-card, .gate-card, .cmp, details'
-    );
-    targets.forEach(function(el){ el.classList.add('reveal'); });
-    var revObs = new IntersectionObserver(function(entries){
-      entries.forEach(function(e){
-        if (e.isIntersecting){ e.target.classList.add('in'); revObs.unobserve(e.target); }
-      });
-    }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
-    targets.forEach(function(el){ revObs.observe(el); });
-  }
-
-  /* ---------- 4. Exit-intent upsell (desktop only — mobile false-fires too easily) ---------- */
   var popup = document.getElementById('exitPopup');
-  if (popup) {
-    var shown = false;
-    function fire(){
-      if (shown || sessionStorage.getItem('exitShown')) return;
-      shown = true;
-      sessionStorage.setItem('exitShown','1');
-      popup.classList.add('show');
-    }
-    function closeP(){ popup.classList.remove('show'); }
-    document.getElementById('exitClose').addEventListener('click', closeP);
-    document.getElementById('exitDismiss').addEventListener('click', closeP);
-    popup.addEventListener('click', function(e){ if(e.target === popup) closeP(); });
-    document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeP(); });
-
-    // Desktop only: pointer with a fine hover leaving the top of the viewport.
-    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
-      document.addEventListener('mouseout', function(e){
-        if (!e.relatedTarget && e.clientY <= 0) fire();
-      });
-    }
+  var shown = false;
+  function fire(){
+    if (shown || sessionStorage.getItem('exitShown')) return;
+    shown = true;
+    sessionStorage.setItem('exitShown','1');
+    popup.classList.add('show');
   }
+  function close(){ popup.classList.remove('show'); }
+  document.getElementById('exitClose').addEventListener('click', close);
+  document.getElementById('exitDismiss').addEventListener('click', close);
+  popup.addEventListener('click', function(e){ if(e.target === popup) close(); });
+
+  // Desktop: mouse leaves the top of the viewport
+  document.addEventListener('mouseout', function(e){
+    if (!e.relatedTarget && e.clientY <= 0) fire();
+  });
+
+  // Mobile: user has scrolled past the free section, then scrolls up fast (leaving intent)
+  var lastY = window.scrollY, freeTop = 0;
+  var freeEl = document.getElementById('free');
+  if (freeEl) freeTop = freeEl.offsetTop;
+  window.addEventListener('scroll', function(){
+    var y = window.scrollY;
+    if (y < lastY - 12 && y > freeTop * 0.5 && lastY > freeTop) fire();
+    lastY = y;
+  }, {passive:true});
 })();
 </script>
 
