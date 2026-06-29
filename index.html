@@ -121,11 +121,44 @@
   .cmp td.no{color:var(--muted);}
   .cmp td.yes{color:var(--lime);font-weight:600;}
 
+  /* deal bar (sticky top) */
+  body{padding-top:42px;}
+  .dealbar{position:fixed;top:0;left:0;right:0;z-index:50;background:var(--lime);color:#11140f;
+    text-align:center;font-family:'Space Grotesk';font-weight:700;font-size:.92rem;
+    padding:11px 16px;letter-spacing:.01em;box-shadow:0 2px 18px rgba(0,0,0,.35);}
+  .strike{text-decoration:line-through;}
+  .dealbar .strike{opacity:.55;font-weight:500;margin:0 2px;}
+  .dealbar .pulse{display:inline-block;width:8px;height:8px;border-radius:50%;background:#11140f;
+    margin-right:8px;vertical-align:middle;animation:blink 1.3s infinite;}
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:.25;}}
+
+  /* price atoms */
+  .pricetag{display:inline-flex;align-items:baseline;gap:10px;font-family:'Space Grotesk';}
+  .pricetag .was{text-decoration:line-through;color:var(--muted);font-size:1.15rem;font-weight:500;}
+  .pricetag .now{color:var(--lime);font-weight:700;font-size:2.6rem;line-height:1;}
+  .pricetag .cur{color:var(--lime);font-weight:700;font-size:1.3rem;align-self:flex-start;margin-top:.2em;}
+  .pill{display:inline-block;background:var(--lime);color:#11140f;font-family:'Space Grotesk';
+    font-weight:700;font-size:.72rem;letter-spacing:.08em;padding:4px 10px;border-radius:999px;
+    text-transform:uppercase;vertical-align:middle;}
+  .pill.outline{background:transparent;color:var(--lime);border:1.5px solid var(--lime);}
+  .hero-price{display:flex;align-items:center;gap:12px;margin:22px 0 6px;flex-wrap:wrap;}
+  .hero-price .pricetag .now{font-size:1.9rem;}
+
   /* CTA bands */
   .band{background:linear-gradient(180deg,var(--charcoal-2),var(--charcoal));text-align:center;}
   .band h2{font-size:clamp(1.8rem,4vw,2.6rem);margin-bottom:14px;}
   .band p{color:var(--muted);max-width:46ch;margin:0 auto;}
   .price{font-family:'Space Grotesk';font-weight:700;color:var(--lime);font-size:1.1rem;margin-top:16px;}
+
+  /* deal card */
+  .deal-card{max-width:440px;margin:26px auto 0;background:var(--card);border:1px solid var(--line);
+    border-radius:20px;padding:30px 28px;position:relative;box-shadow:0 20px 50px rgba(0,0,0,.4);}
+  .deal-card .ribbon{position:absolute;top:-13px;left:50%;transform:translateX(-50%);}
+  .deal-card .pricetag{justify-content:center;margin:6px 0 4px;}
+  .deal-card .save{color:var(--lime);font-family:'Space Grotesk';font-weight:600;font-size:.95rem;margin-bottom:4px;}
+  .deal-card .anchor{color:var(--muted);font-size:.86rem;margin-top:6px;}
+  .deal-card .urgency{color:var(--muted);font-size:.8rem;margin-top:16px;}
+  .deal-card .urgency b{color:var(--ink);}
 
   .free-gate{background:
     radial-gradient(700px 300px at 50% 0,rgba(200,255,55,.08),transparent 60%),var(--charcoal);}
@@ -157,10 +190,18 @@
     .benefits{grid-template-columns:1fr;}
     .preview-row{grid-template-columns:1fr 1fr;}
     .btn-row{justify-content:flex-start;}
+    .hero-price{justify-content:flex-start;}
+    .dealbar{font-size:.78rem;padding:10px 12px;}
+    body{padding-top:40px;}
   }
 </style>
 </head>
 <body>
+
+<!-- DEAL BAR -->
+<div class="dealbar">
+  <span class="pulse"></span>Launch deal — full book <span class="strike">$5.99</span> now just $3.99 · or read the free version below
+</div>
 
 <!-- 1. HERO -->
 <section class="hero">
@@ -169,10 +210,15 @@
       <span class="eyebrow">No product · no money to start · no audience</span>
       <h1>I went from <span class="hl">0 followers</span> to getting paid by ads.</h1>
       <p class="sub">Here's the exact playbook I'd hand my younger self: pick a niche that's already hot, blow up on X, and turn that attention into ad money.</p>
-      <div class="btn-row">
-        <a class="btn btn-primary" href="https://payhip.com/buy?link=aJTdq">Get the full book →</a>
-        <a class="btn btn-ghost" href="#free">Or grab the free lite version</a>
+      <div class="hero-price">
+        <span class="pill">33% off launch</span>
+        <span class="pricetag"><span class="was">$5.99</span><span class="cur">$</span><span class="now">3.99</span></span>
       </div>
+      <div class="btn-row">
+        <a class="btn btn-primary" href="https://payhip.com/buy?link=aJTdq">Get the full book — $3.99 →</a>
+        <a class="btn btn-ghost" href="#free">Or read the free version</a>
+      </div>
+      <p style="color:var(--muted);font-size:.85rem;margin-top:14px;">Skint right now? Grab the <a href="#free" style="color:var(--lime);text-decoration:none;border-bottom:1px solid var(--line);">free lite version</a> — no card needed.</p>
     </div>
     <div>
       <img class="cover-img" src="images/new_front_cover.png" alt="Traffic to Treasure — book cover" />
@@ -249,15 +295,26 @@
   </div>
 </section>
 
-<!-- 7. PRIMARY CTA -->
+<!-- 7. PRIMARY CTA (deal card) -->
 <section class="band">
   <div class="wrap">
     <h2>Get the full playbook</h2>
     <p>Instant download after checkout. Read it tonight, start tomorrow.</p>
-    <div class="price">One-time — yours forever</div>
-    <div class="btn-row" style="justify-content:center;">
-      <a class="btn btn-primary" href="https://payhip.com/buy?link=aJTdq">Buy the full book →</a>
+
+    <div class="deal-card">
+      <span class="ribbon pill">Launch price · 33% off</span>
+      <div class="save">You save $2.00</div>
+      <div class="pricetag">
+        <span class="was">$5.99</span><span class="cur">$</span><span class="now">3.99</span>
+      </div>
+      <p class="anchor">Less than a coffee — one-time, yours forever, instant PDF.</p>
+      <div class="btn-row" style="justify-content:center;margin-top:22px;">
+        <a class="btn btn-primary" href="https://payhip.com/buy?link=aJTdq">Lock in $3.99 →</a>
+      </div>
+      <p class="urgency"><b>Heads up:</b> this is the launch price. It goes back to $5.99 soon.</p>
     </div>
+
+    <p style="color:var(--muted);font-size:.85rem;margin-top:22px;">Not ready? The <a href="#free" style="color:var(--lime);text-decoration:none;border-bottom:1px solid var(--line);">free lite version</a> is right below.</p>
   </div>
 </section>
 
@@ -265,14 +322,14 @@
 <section class="free-gate" id="free">
   <div class="wrap">
     <div class="gate-card">
-      <span class="eyebrow">Not ready to buy?</span>
-      <h2 class="big">Grab the free lite version</h2>
-      <p style="color:var(--muted);">Get the first chapters free. Just watch one quick ad on the download page — that's what keeps it free.</p>
+      <span class="pill outline">100% free</span>
+      <h2 class="big" style="margin-top:16px;">Start free. Zero risk.</h2>
+      <p style="color:var(--muted);">Read the first chapters free and see if it clicks. Just watch one quick ad on the download page — that's what keeps it free. No card, no email wall.</p>
       <div class="btn-row" style="justify-content:center;">
-        <a class="btn btn-primary" href="https://www.up-4ever.net/55zofzcrdiin">Download the free lite book</a>
+        <a class="btn btn-primary" href="https://www.up-4ever.net/55zofzcrdiin">Download the free version</a>
       </div>
-      <p class="adnote">One short ad keeps the lite version free. Then it's yours.</p>
-      <p class="tiny">Want the rest — the ad setup, the payout-tier link, the traffic system? The full book's right above.</p>
+      <p class="adnote">One short ad keeps it free. Then it's yours.</p>
+      <p class="tiny">Like it? The full book — ad setup, the payout-tier link, the traffic system, scaling — is just <span style="color:var(--lime);font-weight:600;">$3.99 right now</span> <span class="strike" style="color:var(--muted);">$5.99</span>. <a href="#" style="color:var(--lime);text-decoration:none;border-bottom:1px solid var(--line);">Scroll up to grab the deal.</a></p>
     </div>
   </div>
 </section>
@@ -284,7 +341,8 @@
     <h2 class="big">Before you ask</h2>
     <div style="margin-top:26px;">
       <details><summary>What's the difference between the free and full version?</summary><div class="ans">The free lite book covers picking your niche and growing on X. The full book adds the part that makes money — the ad setup, the payout-tier link, the traffic system, and how to scale.</div></details>
-      <details><summary>Is it really free?</summary><div class="ans">Yes. The lite version costs nothing — you just watch one short ad on the download page.</div></details>
+      <details><summary>How much is the full book?</summary><div class="ans">It's $3.99 right now, down from $5.99 for the launch. One-time payment, yours forever, instant PDF download. The price goes back up to $5.99 once the launch window closes.</div></details>
+      <details><summary>Is it really free?</summary><div class="ans">Yes — the lite version costs nothing. You just watch one short ad on the download page. No card, no email required.</div></details>
       <details><summary>Do I need money to start?</summary><div class="ans">No. Every tool in the playbook has a free tier. The whole point is starting from zero.</div></details>
       <details><summary>Do I need followers already?</summary><div class="ans">No. The book opens at zero followers and the first real chapter is how to get your first thousand.</div></details>
       <details><summary>How long does this take?</summary><div class="ans">The reading is one evening. The growth is the slow part — most people quit at day 30. Stick past that and it compounds.</div></details>
@@ -296,10 +354,14 @@
 <section class="band">
   <div class="wrap">
     <h2>Start from zero. Get paid.</h2>
-    <p>Buy the full book, or grab the free version and see for yourself.</p>
-    <div class="btn-row" style="justify-content:center;">
-      <a class="btn btn-primary" href="https://payhip.com/buy?link=aJTdq">Get the full book →</a>
-      <a class="btn btn-ghost" href="#free">Free lite version</a>
+    <p>Read it free, or own the whole playbook for the price of a coffee.</p>
+    <div class="hero-price" style="justify-content:center;">
+      <span class="pill">33% off — ends soon</span>
+      <span class="pricetag"><span class="was">$5.99</span><span class="cur">$</span><span class="now">3.99</span></span>
+    </div>
+    <div class="btn-row" style="justify-content:center;margin-top:18px;">
+      <a class="btn btn-primary" href="https://payhip.com/buy?link=aJTdq">Get the full book — $3.99 →</a>
+      <a class="btn btn-ghost" href="#free">Read it free first</a>
     </div>
   </div>
 </section>
