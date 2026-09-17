@@ -7,13 +7,14 @@
 <meta name="description" content="The lazy beginner's playbook: blow up on X from zero, build a free site, and turn attention into ad revenue. Free lite version, or grab the full book." />
 <meta name="theme-color" content="#15181c" />
 
-<!-- Branded favicon (inline SVG data-URI — lime monogram on charcoal, no extra request, never 404s) -->
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2315181c'/%3E%3Ctext x='16' y='23' font-family='Space Grotesk,Arial,sans-serif' font-size='20' font-weight='700' text-anchor='middle' fill='%23c8ff37'%3ET%3C/text%3E%3C/svg%3E" />
+<!-- Branded favicon (inline SVG data-URI — the same traffic-to-treasure mark as the navbar
+     logo: dots climbing into a coin. No extra request, never 404s, no font dependency. -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23c8ff37'/%3E%3Cg fill='%2311140f'%3E%3Ccircle cx='6.4' cy='25.6' r='1.35'/%3E%3Ccircle cx='10.4' cy='22.8' r='1.6'/%3E%3Ccircle cx='14.3' cy='19.7' r='1.8'/%3E%3Ccircle cx='21.6' cy='12.4' r='6.1'/%3E%3C/g%3E%3Cg fill='none' stroke='%23c8ff37' stroke-width='1.35' stroke-linecap='round'%3E%3Cpath d='M21.6 7.2v10.4'/%3E%3Cpath d='M23.7 10c0-1.3-1-1.6-2.1-1.6s-2.1.5-2.1 1.6 1 1.6 2.1 2.4 2.1 1.3 2.1 2.4-1 1.6-2.1 1.6-2.1-.3-2.1-1.6'/%3E%3C/g%3E%3C/svg%3E" />
 
 <!-- Social share cards — this funnel is meant to be shared on X, so it needs a rich preview -->
 <meta property="og:type" content="website" />
 <meta property="og:title" content="I went from 0 followers to getting paid by ads." />
-<meta property="og:description" content="The lazy beginner's playbook: blow up on X from zero, build a free site, and turn attention into ad revenue. Free lite version, or grab the full book for $3.99." />
+<meta property="og:description" content="The lazy beginner's playbook: blow up on X from zero, build a free site, and turn attention into ad money. Free lite version, or grab the full book for $3.99." />
 <meta property="og:image" content="images/cover.webp" />
 <meta property="og:image:alt" content="Traffic to Treasure — book cover" />
 <meta name="twitter:card" content="summary_large_image" />
@@ -27,7 +28,19 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
 <style>
+  /* ============================================================
+     DESIGN SYSTEM
+     Layout, spacing, rounding and component anatomy follow the
+     ScrewFast template (Astro + Tailwind + Preline): a floating
+     pill navbar, wide 85rem container, two-column hero with a
+     social-proof row, a trust strip, 4-up icon feature cards,
+     a vertical-tab feature browser, testimonial + stat band,
+     side-by-side pricing cards, divided FAQ accordion and a
+     multi-column footer.
+     The palette, copy and 3D book are unchanged and ours.
+     ============================================================ */
   :root{
+    /* brand palette — unchanged */
     --charcoal:#15181c;
     --charcoal-2:#1d2127;
     --card:#21262e;
@@ -37,13 +50,23 @@
     --muted:#a3acb6;
     --line:#2e353e;
     --red:#ff6b5e;
-    --radius:16px;
-    --maxw:980px;
+
+    /* ScrewFast-style scale */
+    --maxw:85rem;          /* the template's container width */
+    --gutter:1.5rem;
+    --r-sm:.5rem;          /* rounded-lg  — buttons, small chips */
+    --r-md:.75rem;         /* rounded-xl  — cards */
+    --r-lg:1rem;           /* rounded-2xl — large panels */
+    --r-pill:36px;         /* the navbar's rounded-[36px] */
+    --nav-h:68px;
+    --bar-h:42px;
   }
 
   *{box-sizing:border-box;margin:0;padding:0;}
   /* charcoal lives on <html> so the page is dark before Three.js loads and for no-JS users */
   html{scroll-behavior:smooth;background:var(--charcoal);}
+  /* anchored sections clear the fixed bar + navbar */
+  html{scroll-padding-top:calc(var(--bar-h) + var(--nav-h) + 16px);}
 
   /* 3D background canvas — sits behind everything, never intercepts clicks */
   #bg-canvas{
@@ -55,59 +78,201 @@
     background:transparent;
     color:var(--ink);
     font-family:'Sora',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-    line-height:1.6;
+    line-height:1.65;
     -webkit-font-smoothing:antialiased;
     text-rendering:optimizeLegibility;
+    padding-top:calc(var(--bar-h) + var(--nav-h));
   }
-  h1,h2,h3,.display{font-family:'Space Grotesk','Sora',sans-serif;line-height:1.05;letter-spacing:-0.025em;}
+  h1,h2,h3,h4,.display{font-family:'Space Grotesk','Sora',sans-serif;line-height:1.1;letter-spacing:-0.025em;font-weight:700;}
 
-  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px;}
-  section{padding:78px 0;border-bottom:1px solid var(--line);}
-  section:last-of-type{border-bottom:none;}
+  /* ---------- layout primitives ---------- */
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 var(--gutter);}
+  .wrap-narrow{max-width:60rem;margin:0 auto;padding:0 var(--gutter);}
+  section{padding:clamp(60px,7.5vw,112px) 0;}
+  /* the template separates bands with background, not rules — only a few keep a hairline */
+  .sec-line{border-top:1px solid var(--line);}
+
+  /* section heading block (ScrewFast: max-w-2xl, mb-10 lg:mb-14) */
+  .sec-head{max-width:44rem;margin-bottom:clamp(36px,4vw,56px);}
+  .sec-head.center{margin-left:auto;margin-right:auto;text-align:center;}
+  .sec-head.wide{max-width:54rem;}
+  h2.big{font-size:clamp(1.7rem,3.6vw,2.5rem);margin-bottom:14px;}
+  h2.big .hl{color:var(--lime);}
+  .sec-head p{color:var(--muted);font-size:1.05rem;}
+  .sec-head.center p{margin-left:auto;margin-right:auto;max-width:56ch;}
 
   .eyebrow{
     display:inline-block;font-size:.78rem;font-weight:600;letter-spacing:.14em;
-    text-transform:uppercase;color:var(--lime);margin-bottom:18px;
+    text-transform:uppercase;color:var(--lime);margin-bottom:14px;
   }
 
-  /* buttons */
+  /* ---------- buttons (ScrewFast uses rounded-lg, not pills) ---------- */
   .btn{
-    position:relative;display:inline-block;font-family:'Space Grotesk',sans-serif;font-weight:700;
-    font-size:1.04rem;letter-spacing:-0.01em;text-decoration:none;border-radius:999px;
-    padding:17px 32px;transition:transform .18s cubic-bezier(.2,.7,.2,1),box-shadow .18s ease,filter .18s ease;
+    position:relative;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1rem;letter-spacing:-0.01em;
+    text-decoration:none;border-radius:var(--r-sm);padding:14px 24px;border:2px solid transparent;
+    transition:transform .18s cubic-bezier(.2,.7,.2,1),box-shadow .18s ease,filter .18s ease,
+               background-color .18s ease,border-color .18s ease,color .18s ease;
     cursor:pointer;will-change:transform;
   }
-  .btn:hover{transform:translateY(-3px);}
-  .btn:active{transform:translateY(-1px);}
+  .btn:hover{transform:translateY(-2px);}
+  .btn:active{transform:translateY(0);}
   /* primary CTA: brighter, gradient sheen, stronger glow — this is what the eye should land on */
   .btn-primary{
     background:linear-gradient(135deg,#d8ff5e 0%,var(--lime) 55%,var(--lime-dim) 100%);
-    color:#0e1109;font-weight:700;
-    box-shadow:0 10px 30px rgba(200,255,55,.28),inset 0 1px 0 rgba(255,255,255,.4);
+    color:#0e1109;
+    box-shadow:0 10px 30px rgba(200,255,55,.22),inset 0 1px 0 rgba(255,255,255,.4);
   }
   .btn-primary:hover{
-    box-shadow:0 16px 44px rgba(200,255,55,.42),inset 0 1px 0 rgba(255,255,255,.5);
+    box-shadow:0 16px 44px rgba(200,255,55,.36),inset 0 1px 0 rgba(255,255,255,.5);
     filter:saturate(1.08) brightness(1.03);
   }
-  .btn-ghost{background:rgba(33,38,46,.4);color:var(--ink);border:1.5px solid var(--line);backdrop-filter:blur(4px);}
-  .btn-ghost:hover{border-color:var(--lime);color:var(--lime);box-shadow:0 8px 26px rgba(0,0,0,.3);}
-  .btn-row{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-top:30px;}
+  .btn-ghost{background:rgba(33,38,46,.5);color:var(--ink);border-color:var(--line);backdrop-filter:blur(6px);}
+  .btn-ghost:hover{border-color:var(--lime);color:var(--lime);}
+  .btn-sm{padding:10px 18px;font-size:.92rem;}
+  .btn-lg{padding:16px 30px;font-size:1.06rem;}
+  .btn-block{width:100%;}
+  .btn-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:28px;}
+  .btn-row.center{justify-content:center;}
 
-  /* HERO */
-  .hero{background:radial-gradient(1100px 480px at 70% -10%,rgba(200,255,55,.12),transparent 60%);padding-top:64px;position:relative;}
-  .hero-grid{display:grid;grid-template-columns:1.12fr .88fr;gap:46px;align-items:center;}
-  .hero h1{font-size:clamp(2.5rem,6vw,4.2rem);margin-bottom:22px;font-weight:700;}
-  .hero h1 .hl{
-    color:var(--lime);
-    text-shadow:0 0 38px rgba(200,255,55,.35);
+  /* ---------- top announcement bar (launch deal) ---------- */
+  .dealbar{
+    position:fixed;top:0;left:0;right:0;z-index:60;height:var(--bar-h);
+    display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;
+    background:var(--charcoal-2);border-bottom:1px solid var(--line);
+    color:var(--ink);font-size:.86rem;padding:0 16px;
   }
-  .hero p.sub{font-size:clamp(1.1rem,1.6vw,1.28rem);color:var(--muted);max-width:36ch;font-weight:400;}
+  .dealbar .db-tag{
+    display:inline-flex;align-items:center;gap:6px;background:var(--lime);color:#11140f;
+    font-family:'Space Grotesk';font-weight:700;font-size:.68rem;letter-spacing:.1em;
+    text-transform:uppercase;padding:3px 9px;border-radius:999px;flex-shrink:0;
+  }
+  .dealbar .pulse{display:inline-block;width:6px;height:6px;border-radius:50%;background:#11140f;
+    animation:blink 1.3s infinite;}
+  .strike{text-decoration:line-through;}
+  .dealbar .strike{color:var(--muted);}
+  .dealbar b{color:var(--lime);font-variant-numeric:tabular-nums;font-family:'Space Grotesk';}
+  .dealbar .db-short{display:none;}
+  /* the separator is CSS, so markup whitespace can't double-space it */
+  .dealbar .db-clock::before{content:"·";color:var(--muted);margin-right:9px;}
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:.25;}}
+
+  /* ---------- floating pill navbar (ScrewFast NavbarMegaMenu) ---------- */
+  .navwrap{position:fixed;top:var(--bar-h);left:0;right:0;z-index:55;padding:10px var(--gutter) 0;}
+  .nav{
+    max-width:var(--maxw);margin:0 auto;height:calc(var(--nav-h) - 10px);
+    display:flex;align-items:center;gap:18px;
+    padding:0 10px 0 18px;border:1px solid var(--line);border-radius:var(--r-pill);
+    background:rgba(29,33,39,.72);backdrop-filter:blur(14px) saturate(1.1);
+    box-shadow:0 8px 30px rgba(0,0,0,.35);
+    transition:background-color .25s ease,border-color .25s ease;
+  }
+  body.scrolled .nav{background:rgba(29,33,39,.92);border-color:#39424e;}
+  .brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);flex-shrink:0;}
+  /* the mark paints its own lime tile, so this only sizes it and adds the brand glow */
+  .brand .mark{
+    width:32px;height:32px;flex-shrink:0;display:block;border-radius:9px;
+    box-shadow:0 4px 14px rgba(200,255,55,.24);
+    transition:transform .22s cubic-bezier(.2,.7,.2,1);
+  }
+  .brand:hover .mark{transform:translateY(-1px) scale(1.05);}
+  .brand .bname{font-family:'Space Grotesk';font-weight:700;font-size:.95rem;letter-spacing:.02em;white-space:nowrap;}
+  .nav-links{display:flex;align-items:center;gap:4px;margin-left:8px;}
+  .nav-links a,.nav-drop>button{
+    display:inline-flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;
+    font-family:'Sora',sans-serif;font-size:.92rem;font-weight:500;color:var(--muted);
+    text-decoration:none;padding:9px 13px;border-radius:var(--r-sm);
+    transition:color .16s ease,background-color .16s ease;
+  }
+  .nav-links a:hover,.nav-drop>button:hover{color:var(--ink);background:rgba(200,255,55,.07);}
+  .nav-spacer{flex:1;}
+  .nav-cta{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+  .nav-cta .btn{white-space:nowrap;}
+  .nb-short{display:none;}
+
+  /* old price as a little sale sticker pinned to the buy button's corner. Absolute, so it
+     sits outside the flex flow and can't push the label around; charcoal rather than red,
+     which stays reserved for the ad-demo warnings. */
+  .sale-sticker{
+    /* pulled in far enough to stay inside the navbar pill rather than poking over its border */
+    position:absolute;top:-6px;right:-7px;
+    background:var(--charcoal-2);color:var(--muted);
+    font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.64rem;
+    text-decoration:line-through;text-decoration-thickness:1.5px;
+    line-height:1.4;padding:2px 7px;border-radius:999px;
+    border:1.5px solid var(--line);transform:rotate(9deg);
+    box-shadow:0 3px 10px rgba(0,0,0,.5);pointer-events:none;
+  }
+  .btn:hover .sale-sticker{transform:rotate(9deg) scale(1.06);}
+
+  /* mega dropdown */
+  .nav-drop{position:relative;}
+  .nav-drop>button svg{transition:transform .2s ease;}
+  .nav-drop[data-open="true"]>button{color:var(--ink);background:rgba(200,255,55,.07);}
+  .nav-drop[data-open="true"]>button svg{transform:rotate(180deg);}
+  .drop-panel{
+    position:absolute;top:calc(100% + 10px);left:0;min-width:320px;
+    background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);
+    box-shadow:0 24px 60px rgba(0,0,0,.55);padding:8px;
+    opacity:0;visibility:hidden;transform:translateY(-6px);
+    transition:opacity .18s ease,transform .18s ease,visibility .18s;
+  }
+  .nav-drop[data-open="true"] .drop-panel{opacity:1;visibility:visible;transform:none;}
+  .drop-item{display:flex;gap:12px;padding:12px;border-radius:var(--r-sm);text-decoration:none;color:var(--ink);}
+  .drop-item:hover{background:var(--charcoal-2);}
+  .drop-item .di-ic{color:var(--lime);flex-shrink:0;margin-top:2px;}
+  .drop-item .di-t{display:block;font-family:'Space Grotesk';font-weight:600;font-size:.92rem;}
+  .drop-item .di-d{display:block;color:var(--muted);font-size:.8rem;line-height:1.45;margin-top:3px;}
+
+  /* mobile toggle */
+  .nav-toggle{
+    display:none;background:rgba(33,38,46,.6);border:1px solid var(--line);color:var(--ink);
+    width:40px;height:40px;border-radius:var(--r-sm);cursor:pointer;place-items:center;
+  }
+  .nav-toggle:hover{border-color:var(--lime);color:var(--lime);}
+
+  /* ---------- hero ---------- */
+  .hero{
+    background:
+      radial-gradient(1100px 520px at 72% -12%,rgba(200,255,55,.13),transparent 62%),
+      radial-gradient(700px 400px at 8% 0,rgba(200,255,55,.05),transparent 60%);
+    padding-top:clamp(40px,5vw,72px);position:relative;
+  }
+  .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(32px,4vw,64px);align-items:center;}
+  /* announcement pill, straight from the template's hero */
+  .hero-pill{
+    display:inline-flex;align-items:center;gap:10px;background:var(--card);
+    border:1px solid var(--line);border-radius:999px;padding:5px 6px 5px 14px;
+    font-size:.82rem;color:var(--muted);margin-bottom:22px;text-decoration:none;
+    transition:border-color .18s ease;
+  }
+  .hero-pill:hover{border-color:var(--lime);}
+  .hero-pill .hp-tag{
+    background:var(--lime);color:#11140f;font-family:'Space Grotesk';font-weight:700;
+    font-size:.68rem;letter-spacing:.09em;text-transform:uppercase;padding:4px 10px;border-radius:999px;
+  }
+  .hero h1{font-size:clamp(2.4rem,5.6vw,4rem);margin-bottom:20px;}
+  .hero h1 .hl{color:var(--lime);text-shadow:0 0 38px rgba(200,255,55,.32);}
+  .hero p.sub{font-size:clamp(1.05rem,1.5vw,1.22rem);color:var(--muted);max-width:40ch;}
+  .hero-note{color:var(--muted);font-size:.86rem;margin-top:14px;}
+  .hero-note a,.inline-link{color:var(--lime);text-decoration:none;border-bottom:1px solid rgba(200,255,55,.35);}
+  .hero-note a:hover,.inline-link:hover{border-bottom-color:var(--lime);}
+
+  /* social-proof row under the hero buttons (template slot, filled with honest facts).
+     No rule of its own — the trust strip below already provides one, and two hairlines
+     this close read as clutter. */
+  .proofrow{
+    display:flex;align-items:center;gap:11px 26px;flex-wrap:wrap;margin-top:30px;
+  }
+  .proofrow .pr-item{display:flex;align-items:center;gap:9px;font-size:.88rem;color:var(--muted);}
+  .proofrow .pr-item svg{color:var(--lime);flex-shrink:0;}
+  .proofrow .pr-item b{color:var(--ink);font-family:'Space Grotesk';font-weight:600;}
 
   /* hero visual stage: reserves space so there's no layout shift; holds the static
      fallback cover, which fades out once the 3D book is rendering. */
-  .hero-visual{position:relative;width:100%;aspect-ratio:1/1;max-width:380px;margin:0 auto;}
+  .hero-visual{position:relative;width:100%;aspect-ratio:1/1;max-width:400px;margin:0 auto;}
   .cover-img{
-    position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;border-radius:16px;
+    position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;border-radius:var(--r-md);
     box-shadow:0 30px 70px rgba(0,0,0,.55),0 0 0 1px rgba(200,255,55,.06);
     transform:rotate(2deg);
     transition:opacity .6s ease,transform .35s ease;
@@ -116,183 +281,319 @@
   /* once Three.js takes over, this class fades the static image out */
   body.book3d-ready .cover-img{opacity:0;pointer-events:none;}
 
-  /* generic two-col / stack */
-  .lead{font-size:1.45rem;font-weight:500;max-width:24ch;}
-  h2.big{font-size:clamp(1.7rem,3.6vw,2.4rem);margin-bottom:12px;}
-  .section-intro{color:var(--muted);max-width:52ch;margin-bottom:34px;}
+  /* ---------- trust strip ("Trusted by industry leaders") ---------- */
+  .trust{margin-top:clamp(44px,5vw,76px);padding:clamp(34px,4vw,50px) 0 0;border-top:1px solid var(--line);}
+  .trust .t-label{text-align:center;color:var(--muted);font-size:.84rem;margin-bottom:22px;}
+  .logo-row{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;}
+  .logo-chip{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    border:1px solid var(--line);border-radius:var(--r-md);background:rgba(33,38,46,.35);
+    padding:16px 10px;font-family:'Space Grotesk';font-weight:600;font-size:.92rem;color:var(--muted);
+    transition:color .18s ease,border-color .18s ease;
+  }
+  .logo-chip:hover{color:var(--ink);border-color:#39424e;}
+  .logo-chip .lc-free{font-family:'Sora';font-weight:400;font-size:.7rem;color:var(--lime);}
 
-  /* benefits */
-  .benefits{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  /* ---------- 4-up icon feature cards (FeaturesGeneral) ---------- */
+  .fcards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+  .fcard{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);
+    padding:24px 22px;transition:border-color .2s ease,transform .2s ease;
+  }
+  .fcard:hover{border-color:#3d4854;transform:translateY(-3px);}
+  .fcard .ic{
+    width:44px;height:44px;border-radius:11px;display:grid;place-items:center;
+    background:rgba(200,255,55,.11);color:var(--lime);border:1px solid rgba(200,255,55,.2);
+    margin-bottom:16px;
+  }
+  .fcard h3{font-size:1.06rem;margin-bottom:8px;}
+  .fcard p{color:var(--muted);font-size:.92rem;}
+
+  /* ---------- what's inside: split layout + checklist ---------- */
+  .split{display:grid;grid-template-columns:.85fr 1.15fr;gap:clamp(32px,4vw,64px);align-items:start;}
+  .split .sec-head{margin-bottom:0;position:sticky;top:calc(var(--bar-h) + var(--nav-h) + 24px);}
+  .checklist{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
   /* flex column so the FULL BOOK badge pins to the bottom of every card → clean baseline
      regardless of how much text sits above it (fixes ragged badge heights). */
-  .bcard{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
-    padding:22px 22px;display:flex;flex-direction:column;}
-  .bcard .tick{color:var(--lime);font-weight:700;margin-right:8px;}
-  .bcard.full::after{content:"FULL BOOK";align-self:flex-start;
+  .bcard{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);
+    padding:20px;display:flex;flex-direction:column;gap:12px;font-size:.95rem;
+    transition:border-color .2s ease;
+  }
+  .bcard:hover{border-color:#3d4854;}
+  .bcard .tick{
+    width:26px;height:26px;border-radius:8px;display:grid;place-items:center;flex-shrink:0;
+    background:rgba(200,255,55,.12);color:var(--lime);
+  }
+  .bcard .btop{display:flex;gap:11px;align-items:flex-start;}
+  .bcard.full .badge-full{
+    align-self:flex-start;
     /* auto top-margin pins the badge to the card bottom; grid stretches every card to
        equal height, so the badges land on one clean baseline. */
     margin-top:auto;
-    font-size:.66rem;letter-spacing:.12em;color:#11140f;background:var(--lime);
-    padding:3px 9px;border-radius:999px;font-weight:700;}
-  /* gap between the card text and the pinned badge (single flex gap, tick is inline so unaffected) */
-  .bcard.full{gap:14px;}
+    font-size:.64rem;letter-spacing:.12em;color:#11140f;background:var(--lime);
+    padding:3px 9px;border-radius:999px;font-weight:700;font-family:'Space Grotesk';
+  }
+  .bcard .badge-lite{
+    align-self:flex-start;margin-top:auto;font-size:.64rem;letter-spacing:.12em;
+    color:var(--muted);border:1px solid var(--line);padding:3px 9px;border-radius:999px;
+    font-weight:600;font-family:'Space Grotesk';
+  }
 
-  /* preview row */
-  .preview-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:8px;}
-  .pg-fig{margin:0;}
-  .pg-fig img{width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;border-radius:12px;
-    border:1px solid var(--line);box-shadow:0 10px 30px rgba(0,0,0,.4);display:block;}
-  .pg-fig figcaption{color:var(--muted);font-size:.82rem;margin-top:10px;text-align:center;}
+  /* ---------- vertical-tab preview browser (FeaturesNavs) ---------- */
+  /* the capped figure is narrower than a 1.1fr column, which left it stranded at the far
+     right — even columns keep it beside the tab list */
+  .navs{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(28px,3.5vw,48px);align-items:center;}
+  .tablist{display:flex;flex-direction:column;gap:12px;}
+  .tabbtn{
+    display:flex;gap:14px;text-align:left;width:100%;cursor:pointer;
+    background:transparent;border:1px solid transparent;border-radius:var(--r-md);
+    padding:18px 20px;color:var(--ink);font-family:inherit;
+    transition:background-color .2s ease,border-color .2s ease;
+  }
+  .tabbtn:hover{background:rgba(33,38,46,.55);}
+  .tabbtn[aria-selected="true"]{background:var(--card);border-color:var(--line);
+    box-shadow:0 10px 30px rgba(0,0,0,.28);}
+  .tabbtn .t-ic{
+    width:36px;height:36px;border-radius:10px;display:grid;place-items:center;flex-shrink:0;
+    background:rgba(163,172,182,.12);color:var(--muted);transition:background-color .2s,color .2s;
+  }
+  .tabbtn[aria-selected="true"] .t-ic{background:rgba(200,255,55,.13);color:var(--lime);}
+  .tabbtn .t-t{display:block;font-family:'Space Grotesk';font-weight:600;font-size:1rem;margin-bottom:5px;}
+  .tabbtn .t-d{display:block;color:var(--muted);font-size:.88rem;line-height:1.5;}
+  /* cap the square page scans so this section doesn't tower over the tab list */
+  .tabpanes{position:relative;width:100%;max-width:560px;margin:0 auto;}
+  .tabpane{display:none;}
+  .tabpane.active{display:block;}
+  .tabpane img{
+    width:100%;height:auto;aspect-ratio:1/1;object-fit:cover;display:block;
+    border-radius:var(--r-lg);border:1px solid var(--line);
+    box-shadow:0 24px 60px rgba(0,0,0,.45);
+  }
+  .tabpane figcaption{color:var(--muted);font-size:.85rem;margin-top:14px;text-align:center;}
 
-  /* proof */
-  .proof{background:var(--charcoal-2);}
-  .quote{background:var(--card);border:1px solid var(--line);
-    border-radius:12px;padding:22px 24px;font-size:1.05rem;}
-  .quote .who{display:block;margin-top:12px;color:var(--muted);font-size:.85rem;}
+  /* ---------- testimonial + stat band ---------- */
+  .proof-band{background:var(--charcoal-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .quote-card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);
+    padding:clamp(26px,3vw,44px);max-width:56rem;margin:0 auto;
+  }
+  .quote-card .qmark{color:var(--lime);opacity:.35;margin-bottom:14px;}
+  .quote-card p.q{font-size:clamp(1.05rem,1.8vw,1.3rem);font-weight:500;line-height:1.6;}
+  .quote-card .who{display:flex;align-items:center;gap:13px;margin-top:26px;}
+  .quote-card .who img{width:46px;height:46px;border-radius:50%;object-fit:cover;border:2px solid var(--lime);flex-shrink:0;}
+  .quote-card .who .wn{display:block;font-family:'Space Grotesk';font-weight:600;font-size:.95rem;}
+  .quote-card .who .wr{display:block;color:var(--muted);font-size:.83rem;line-height:1.4;}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:30px 16px;margin-top:clamp(40px,4.5vw,64px);}
+  .stat{text-align:center;padding:8px;}
+  .stat .sv{font-family:'Space Grotesk';font-weight:700;color:var(--lime);
+    font-size:clamp(1.9rem,3.4vw,2.6rem);line-height:1;}
+  .stat .sl{color:var(--muted);font-size:.88rem;margin-top:10px;}
+
+  /* ---------- pricing cards (PricingSection) ---------- */
+  /* stretch, not start: the two cards share a height so their footers sit on one baseline */
+  .pricing{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:64rem;margin:0 auto;align-items:stretch;}
+  .plan{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);
+    padding:clamp(24px,2.6vw,36px);display:flex;flex-direction:column;position:relative;height:100%;
+  }
+  .plan.featured{border-color:var(--lime);box-shadow:0 22px 60px rgba(200,255,55,.1),0 22px 60px rgba(0,0,0,.4);}
+  .plan .ribbon{
+    position:absolute;top:-12px;left:50%;transform:translateX(-50%);
+    background:var(--lime);color:#11140f;font-family:'Space Grotesk';font-weight:700;
+    font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;padding:5px 14px;border-radius:999px;
+    white-space:nowrap;
+  }
+  .plan h3{font-size:1.2rem;margin-bottom:6px;}
+  .plan .p-for{color:var(--muted);font-size:.9rem;margin-bottom:20px;}
+  /* gap:1px keeps the currency glyph tight against the figure; the struck price and the
+     "one-time" suffix get their own margins instead of riding the flex gap */
+  .pricetag{display:inline-flex;align-items:baseline;gap:1px;font-family:'Space Grotesk';flex-wrap:wrap;}
+  .pricetag .was{text-decoration:line-through;color:var(--muted);font-size:1.1rem;font-weight:500;margin-right:11px;}
+  .pricetag .cur{color:var(--lime);font-weight:700;font-size:1.25rem;align-self:flex-start;margin-top:.22em;}
+  .pricetag .now{color:var(--lime);font-weight:700;font-size:2.5rem;line-height:1;}
+  .pricetag .per{color:var(--muted);font-size:.88rem;font-family:'Sora';font-weight:400;margin-left:10px;}
+  .plan .p-save{color:var(--lime);font-size:.86rem;font-weight:600;font-family:'Space Grotesk';margin-top:8px;}
+  .plan .p-anchor{color:var(--muted);font-size:.86rem;margin-top:8px;}
+  .plan ul{list-style:none;margin:24px 0;display:grid;gap:11px;}
+  .plan li{display:flex;gap:10px;align-items:flex-start;font-size:.93rem;}
+  .plan li svg{flex-shrink:0;margin-top:3px;}
+  .plan li.yes svg{color:var(--lime);}
+  .plan li.no{color:var(--muted);}
+  .plan li.no svg{color:#5a646f;}
+  .plan .p-foot{margin-top:auto;}
+  .plan .p-note{color:var(--muted);font-size:.8rem;margin-top:14px;text-align:center;}
+  .plan .p-note b{color:var(--ink);}
+  .skipbadge{
+    display:flex;align-items:center;justify-content:center;gap:7px;background:var(--charcoal-2);
+    border:1px solid var(--line);border-radius:999px;padding:8px 13px;margin-bottom:18px;
+    font-size:.8rem;color:var(--ink);font-weight:500;text-align:center;
+  }
+  .skipbadge .bolt{color:var(--lime);}
+  .enterprise{text-align:center;color:var(--muted);font-size:.9rem;margin-top:26px;}
 
   /* comparison table */
-  .cmp{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;}
-  .cmp th,.cmp td{padding:15px 18px;text-align:left;border-bottom:1px solid var(--line);font-size:.97rem;}
-  .cmp th{background:var(--charcoal-2);font-family:'Space Grotesk';}
+  .cmp-wrap{max-width:64rem;margin:clamp(32px,4vw,56px) auto 0;overflow-x:auto;}
+  .cmp{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--line);
+    border-radius:var(--r-md);overflow:hidden;min-width:560px;}
+  .cmp th,.cmp td{padding:15px 18px;text-align:left;border-bottom:1px solid var(--line);font-size:.93rem;vertical-align:top;}
+  .cmp th{background:var(--charcoal-2);font-family:'Space Grotesk';font-weight:600;}
   .cmp th.full{color:var(--lime);}
   .cmp tr:last-child td{border-bottom:none;}
   .cmp td.no{color:var(--muted);}
   .cmp td.yes{color:var(--lime);font-weight:600;}
 
-  /* deal bar (sticky top) */
-  body{padding-top:42px;}
-  .dealbar{position:fixed;top:0;left:0;right:0;z-index:50;background:var(--lime);color:#11140f;
-    text-align:center;font-family:'Space Grotesk';font-weight:700;font-size:.92rem;
-    padding:11px 16px;letter-spacing:.01em;box-shadow:0 2px 18px rgba(0,0,0,.35);}
-  .strike{text-decoration:line-through;}
-  .dealbar .strike{opacity:.55;font-weight:500;margin:0 2px;}
-  .dealbar .pulse{display:inline-block;width:8px;height:8px;border-radius:50%;background:#11140f;
-    margin-right:8px;vertical-align:middle;animation:blink 1.3s infinite;}
-  .dealbar .db-timer b{font-variant-numeric:tabular-nums;}
-  @media (max-width:560px){ .dealbar .db-timer{display:block;margin-top:2px;} }
-  @keyframes blink{0%,100%{opacity:1;}50%{opacity:.25;}}
-
-  /* price atoms */
-  .pricetag{display:inline-flex;align-items:baseline;gap:10px;font-family:'Space Grotesk';}
-  .pricetag .was{text-decoration:line-through;color:var(--muted);font-size:1.15rem;font-weight:500;}
-  .pricetag .now{color:var(--lime);font-weight:700;font-size:2.6rem;line-height:1;}
-  .pricetag .cur{color:var(--lime);font-weight:700;font-size:1.3rem;align-self:flex-start;margin-top:.2em;}
-  .pill{display:inline-block;background:var(--lime);color:#11140f;font-family:'Space Grotesk';
-    font-weight:700;font-size:.72rem;letter-spacing:.08em;padding:4px 10px;border-radius:999px;
-    text-transform:uppercase;vertical-align:middle;}
-  .pill.outline{background:transparent;color:var(--lime);border:1.5px solid var(--lime);}
-  .hero-price{display:flex;align-items:center;gap:12px;margin:22px 0 6px;flex-wrap:wrap;}
-  .hero-price .pricetag .now{font-size:1.9rem;}
-
-  /* CTA bands */
-  .band{background:linear-gradient(180deg,var(--charcoal-2),var(--charcoal));text-align:center;}
-  .band h2{font-size:clamp(1.8rem,4vw,2.6rem);margin-bottom:14px;}
-  .band p{color:var(--muted);max-width:46ch;margin:0 auto;}
-  .price{font-family:'Space Grotesk';font-weight:700;color:var(--lime);font-size:1.1rem;margin-top:16px;}
-
-  /* deal card */
-  .deal-card{max-width:440px;margin:26px auto 0;background:var(--card);border:1px solid var(--line);
-    border-radius:20px;padding:30px 28px;position:relative;box-shadow:0 20px 50px rgba(0,0,0,.4);}
-  .deal-card .ribbon{position:absolute;top:-13px;left:50%;transform:translateX(-50%);}
-  .deal-card .pricetag{justify-content:center;margin:6px 0 4px;}
-  .deal-card .save{color:var(--lime);font-family:'Space Grotesk';font-weight:600;font-size:.95rem;margin-bottom:4px;}
-  .deal-card .anchor{color:var(--muted);font-size:.86rem;margin-top:6px;}
-  .deal-card .urgency{color:var(--muted);font-size:.8rem;margin-top:16px;}
-  .deal-card .urgency b{color:var(--ink);}
-
-  /* free section = the "demo zone": a distinct, slightly warmer/red-tinted area */
-  .free-gate{background:
-    radial-gradient(800px 360px at 50% 0,rgba(255,107,94,.10),transparent 62%),var(--charcoal-2);}
-  .gate-card{max-width:580px;margin:0 auto;text-align:center;background:var(--card);
-    border:1px solid var(--line);border-radius:20px;padding:40px 30px;}
-  .gate-card .tiny{color:var(--muted);font-size:.82rem;margin-top:22px;line-height:1.55;}
-  .host-guide{text-align:left;background:var(--charcoal-2);border:1px solid var(--line);
-    border-radius:12px;padding:16px 20px;margin-top:22px;}
-  .host-guide .hg-title{font-family:'Space Grotesk';font-weight:600;font-size:.86rem;
-    color:var(--ink);margin-bottom:8px;}
-  .host-guide ul{margin:0;padding-left:18px;}
-  .host-guide li{color:var(--muted);font-size:.86rem;margin-bottom:5px;}
-  .host-guide li b{color:var(--ink);}
-
-  /* live-demo warning box */
-  .demo-badge{display:inline-block;background:var(--red);color:#fff;font-family:'Space Grotesk';
-    font-weight:700;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;
-    padding:5px 12px;border-radius:999px;margin-bottom:14px;}
-  .warnbox{text-align:left;background:rgba(255,107,94,.08);border:1px solid rgba(255,107,94,.4);
-    border-radius:12px;padding:18px 20px;margin:0 0 22px;}
+  /* ---------- free download gate ---------- */
+  .free-gate{
+    background:radial-gradient(900px 400px at 50% 0,rgba(255,107,94,.11),transparent 64%),var(--charcoal-2);
+    border-top:1px solid var(--line);
+  }
+  .gate-card{
+    max-width:46rem;margin:0 auto;background:var(--card);border:1px solid var(--line);
+    border-radius:var(--r-lg);padding:clamp(26px,3vw,44px);
+  }
+  .demo-badge{
+    display:inline-flex;align-items:center;gap:7px;background:rgba(255,107,94,.14);color:var(--red);
+    border:1px solid rgba(255,107,94,.4);font-family:'Space Grotesk';font-weight:700;font-size:.7rem;
+    letter-spacing:.08em;text-transform:uppercase;padding:6px 12px;border-radius:999px;margin-bottom:16px;
+  }
+  .warnbox{
+    background:rgba(255,107,94,.07);border:1px solid rgba(255,107,94,.35);
+    border-radius:var(--r-md);padding:20px;margin:0 0 20px;
+  }
   .warnbox .wtitle{font-family:'Space Grotesk';font-weight:700;color:var(--red);font-size:.95rem;margin-bottom:8px;}
-  .warnbox p{color:var(--muted);font-size:.88rem;margin:0;}
+  .warnbox p{color:var(--muted);font-size:.9rem;}
   .warnbox b{color:var(--ink);}
-
   /* author trust block */
-  .author{display:flex;gap:16px;align-items:center;text-align:left;
-    background:var(--charcoal-2);border:1px solid var(--line);border-radius:14px;
-    padding:16px 18px;margin:24px auto 0;max-width:560px;}
-  .author img{width:60px;height:60px;border-radius:50%;object-fit:cover;
-    border:2px solid var(--lime);flex-shrink:0;}
-  .author .atext{font-size:.88rem;color:var(--muted);line-height:1.5;}
+  .author{
+    display:flex;gap:15px;align-items:center;
+    background:var(--charcoal-2);border:1px solid var(--line);border-radius:var(--r-md);
+    padding:16px 18px;margin:20px 0;
+  }
+  .author img{width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid var(--lime);flex-shrink:0;}
+  .author .atext{font-size:.88rem;color:var(--muted);line-height:1.55;}
   .author .atext b{color:var(--ink);font-family:'Space Grotesk';}
+  .host-guide{
+    background:var(--charcoal-2);border:1px solid var(--line);border-radius:var(--r-md);
+    padding:18px 20px;margin-top:20px;
+  }
+  .host-guide .hg-title{font-family:'Space Grotesk';font-weight:600;font-size:.88rem;margin-bottom:10px;}
+  .host-guide ol{margin:0;padding-left:20px;}
+  .host-guide li{color:var(--muted);font-size:.88rem;margin-bottom:6px;}
+  .host-guide li b{color:var(--ink);}
+  .gate-card .tiny{color:var(--muted);font-size:.84rem;margin-top:20px;line-height:1.6;}
 
-  /* skip-ads badge near paid button */
-  .skipbadge{display:inline-flex;align-items:center;gap:7px;background:var(--charcoal-2);
-    border:1px solid var(--line);border-radius:999px;padding:7px 14px;margin-top:16px;
-    font-size:.82rem;color:var(--ink);font-weight:500;}
-  .skipbadge .bolt{color:var(--lime);font-size:1rem;}
+  /* ---------- FAQ accordion (Preline divide style) ---------- */
+  .faq{max-width:52rem;margin:0 auto;border-top:1px solid var(--line);}
+  details{border-bottom:1px solid var(--line);}
+  summary{
+    cursor:pointer;list-style:none;padding:22px 4px;font-family:'Space Grotesk';font-weight:600;
+    font-size:1.02rem;display:flex;justify-content:space-between;align-items:center;gap:16px;
+    transition:color .16s ease;
+  }
+  summary:hover{color:var(--lime);}
+  summary::-webkit-details-marker{display:none;}
+  summary .chev{color:var(--lime);flex-shrink:0;transition:transform .22s ease;}
+  details[open] summary .chev{transform:rotate(180deg);}
+  details .ans{padding:0 4px 24px;color:var(--muted);max-width:62ch;}
+  /* the small in-card FAQ inside the free gate keeps a boxed look */
+  .gate-card details{border:1px solid var(--line);border-radius:var(--r-md);padding:0 18px;margin-top:16px;}
+  .gate-card summary{padding:16px 0;font-size:.95rem;}
+  .gate-card details .ans{padding:0 0 18px;font-size:.9rem;}
 
-  /* sticky mobile buy bar */
+  /* ---------- CTA band ---------- */
+  .band{
+    background:
+      radial-gradient(800px 340px at 50% 110%,rgba(200,255,55,.12),transparent 62%),
+      linear-gradient(180deg,var(--charcoal-2),var(--charcoal));
+    text-align:center;border-top:1px solid var(--line);
+    /* lighter foot than head — the footer follows immediately, so a full pad reads as a void */
+    padding-bottom:clamp(52px,5.5vw,84px);
+  }
+  .band h2{font-size:clamp(1.8rem,4vw,2.7rem);margin-bottom:14px;}
+  .band p{color:var(--muted);max-width:48ch;margin:0 auto;}
+  .band .hero-price{display:flex;align-items:center;gap:12px;justify-content:center;margin:24px 0 0;flex-wrap:wrap;}
+  .pill{
+    display:inline-block;background:var(--lime);color:#11140f;font-family:'Space Grotesk';
+    font-weight:700;font-size:.7rem;letter-spacing:.08em;padding:5px 11px;border-radius:999px;
+    text-transform:uppercase;
+  }
+  .band .pricetag .now{font-size:1.85rem;}
+
+  /* ---------- footer (multi-column) ---------- */
+  footer{background:var(--charcoal-2);border-top:1px solid var(--line);padding:clamp(48px,6vw,80px) 0 0;}
+  .foot-grid{display:grid;grid-template-columns:1.4fr .8fr .8fr 1.2fr;gap:clamp(28px,3vw,48px);}
+  .foot-brand .brand{margin-bottom:14px;}
+  .foot-brand p{color:var(--muted);font-size:.89rem;max-width:34ch;}
+  .foot-col h4{font-family:'Space Grotesk';font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--muted);margin-bottom:16px;font-weight:600;}
+  .foot-col ul{list-style:none;display:grid;gap:11px;}
+  /* scoped to the link lists — a bare `.foot-col a` also won the cascade against
+     .btn-primary and bleached the footer CTA's label */
+  .foot-col ul a{color:var(--ink);text-decoration:none;font-size:.9rem;transition:color .16s ease;}
+  .foot-col ul a:hover{color:var(--lime);}
+  .foot-col .tag{
+    font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;background:rgba(200,255,55,.14);
+    color:var(--lime);padding:2px 7px;border-radius:999px;margin-left:7px;font-weight:700;
+    font-family:'Space Grotesk';
+  }
+  .foot-cta{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:22px;}
+  .foot-cta .fc-t{font-family:'Space Grotesk';font-weight:600;margin-bottom:6px;}
+  .foot-cta p{color:var(--muted);font-size:.86rem;margin-bottom:16px;}
+  .foot-bottom{
+    border-top:1px solid var(--line);margin-top:clamp(36px,4vw,56px);
+    padding:24px 0 30px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;justify-content:space-between;
+  }
+  .foot-bottom p{color:var(--muted);font-size:.84rem;}
+  .socials{display:flex;gap:8px;}
+  .socials a{
+    width:36px;height:36px;border-radius:var(--r-sm);display:grid;place-items:center;
+    border:1px solid var(--line);color:var(--muted);transition:color .16s ease,border-color .16s ease;
+  }
+  .socials a:hover{color:var(--lime);border-color:var(--lime);}
+  .disclaimer{color:var(--muted);font-size:.76rem;max-width:72ch;opacity:.85;padding-bottom:28px;}
+
+  /* ---------- sticky mobile buy bar ---------- */
   .mobilebar{
-    position:fixed;left:0;right:0;bottom:0;z-index:60;
+    position:fixed;left:0;right:0;bottom:0;z-index:65;
     display:none;align-items:center;gap:12px;
-    background:rgba(29,33,39,.92);backdrop-filter:blur(10px);
+    background:rgba(29,33,39,.94);backdrop-filter:blur(12px);
     border-top:1px solid var(--line);padding:10px 14px;
     transform:translateY(110%);transition:transform .28s ease;
     padding-bottom:calc(10px + env(safe-area-inset-bottom));
   }
   .mobilebar.show{transform:translateY(0);}
-  .mobilebar .mb-price{flex:1;font-family:'Space Grotesk';line-height:1.15;}
-  .mobilebar .mb-price .mb-now{color:var(--lime);font-weight:700;font-size:1.25rem;}
-  .mobilebar .mb-price .mb-was{color:var(--muted);text-decoration:line-through;font-size:.85rem;margin-left:6px;}
+  .mobilebar .mb-price{flex:1;font-family:'Space Grotesk';line-height:1.2;}
+  .mobilebar .mb-price .mb-now{color:var(--lime);font-weight:700;font-size:1.22rem;}
+  .mobilebar .mb-price .mb-was{color:var(--muted);text-decoration:line-through;font-size:.84rem;margin-left:6px;}
   .mobilebar .mb-price small{display:block;color:var(--muted);font-size:.72rem;font-weight:400;font-family:'Sora';}
-  .mobilebar .btn{padding:13px 22px;font-size:.95rem;white-space:nowrap;}
+  .mobilebar .btn{padding:12px 20px;font-size:.93rem;white-space:nowrap;}
   @media (max-width:760px){ .mobilebar{display:flex;} }
 
-  /* exit-intent popup */
-  .exit-overlay{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.72);
+  /* ---------- exit-intent popup ---------- */
+  .exit-overlay{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.74);
     display:none;align-items:center;justify-content:center;padding:22px;}
   .exit-overlay.show{display:flex;}
-  .exit-modal{background:var(--card);border:1px solid var(--line);border-radius:20px;
-    max-width:440px;width:100%;padding:34px 30px;text-align:center;position:relative;
-    box-shadow:0 30px 70px rgba(0,0,0,.6);}
-  .exit-modal h3{font-size:1.5rem;margin-bottom:10px;}
-  .exit-modal p{color:var(--muted);font-size:.95rem;margin-bottom:8px;}
-  .exit-modal .close{position:absolute;top:14px;right:18px;background:none;border:none;
-    color:var(--muted);font-size:1.4rem;cursor:pointer;line-height:1;}
+  .exit-modal{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);
+    max-width:27rem;width:100%;padding:34px 30px;text-align:center;position:relative;
+    box-shadow:0 30px 70px rgba(0,0,0,.6);
+  }
+  .exit-modal h3{font-size:1.45rem;margin:14px 0 10px;}
+  .exit-modal p{color:var(--muted);font-size:.94rem;}
+  .exit-modal .close{position:absolute;top:12px;right:16px;background:none;border:none;
+    color:var(--muted);font-size:1.5rem;cursor:pointer;line-height:1;}
   .exit-modal .close:hover{color:var(--ink);}
 
-  /* faq */
-  details{background:var(--card);border:1px solid var(--line);border-radius:12px;
-    padding:0 20px;margin-bottom:12px;overflow:hidden;}
-  summary{cursor:pointer;list-style:none;padding:18px 0;font-family:'Space Grotesk';font-weight:500;
-    display:flex;justify-content:space-between;align-items:center;gap:12px;}
-  summary::-webkit-details-marker{display:none;}
-  summary::after{content:"+";color:var(--lime);font-size:1.3rem;font-weight:700;}
-  details[open] summary::after{content:"–";}
-  details .ans{padding:0 0 20px;color:var(--muted);}
-
-  /* footer */
-  footer{background:var(--charcoal-2);text-align:center;color:var(--muted);font-size:.86rem;}
-  footer a{color:var(--muted);text-decoration:none;border-bottom:1px solid var(--line);}
-  footer a:hover{color:var(--lime);border-color:var(--lime);}
-  .footer-links{display:flex;flex-wrap:wrap;gap:8px 22px;justify-content:center;margin-top:16px;font-size:.84rem;}
-  .footer-links a{border-bottom:none;}
-  .disclaimer{font-size:.74rem;max-width:60ch;margin:18px auto 0;opacity:.8;}
-
+  /* ---------- a11y ---------- */
   /* skip-to-content: hidden until focused (keyboard users) */
-  .skip-link{position:absolute;left:12px;top:-48px;z-index:200;background:var(--lime);color:#11140f;
+  .skip-link{
+    position:absolute;left:12px;top:-56px;z-index:200;background:var(--lime);color:#11140f;
     font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.9rem;text-decoration:none;
-    padding:10px 16px;border-radius:10px;transition:top .18s ease;}
+    padding:10px 16px;border-radius:var(--r-sm);transition:top .18s ease;
+  }
   .skip-link:focus{top:12px;outline:2px solid #11140f;outline-offset:2px;}
-
   /* visible focus ring for keyboard nav across interactive elements (accessibility) */
   a:focus-visible,button:focus-visible,summary:focus-visible{
     outline:2px solid var(--lime);outline-offset:3px;border-radius:6px;
@@ -310,54 +611,202 @@
     .dealbar .pulse{animation:none;}
   }
 
-  @media (max-width:760px){
-    section{padding:56px 0;}
-    .hero h1{font-size:clamp(2.05rem,9vw,2.8rem);}
-    .hero-grid{grid-template-columns:1fr;gap:34px;}
-    .hero-visual{max-width:260px;}
+  /* ---------- responsive ---------- */
+  @media (max-width:1100px){
+    .fcards{grid-template-columns:1fr 1fr;}
+    .logo-row{grid-template-columns:repeat(3,1fr);}
+    .foot-grid{grid-template-columns:1fr 1fr;}
+  }
+  @media (max-width:980px){
+    .hero-grid{grid-template-columns:1fr;gap:38px;}
+    .hero-visual{max-width:300px;}
     .cover-img{transform:none;}
-    .benefits{grid-template-columns:1fr;}
-    .preview-row{grid-template-columns:1fr 1fr;}
-    .btn-row{justify-content:flex-start;}
-    .hero-price{justify-content:flex-start;}
-    .dealbar{font-size:.78rem;padding:10px 12px;}
-    body{padding-top:40px;}
+    .split{grid-template-columns:1fr;}
+    .split .sec-head{position:static;}
+    .navs{grid-template-columns:1fr;}
+    .tabpanes{order:-1;max-width:460px;margin:0 auto;}
+    .pricing{grid-template-columns:1fr;}
+    .stats{grid-template-columns:1fr 1fr;gap:24px 16px;}
+  }
+  @media (max-width:860px){
+    /* collapse the pill navbar into a sheet */
+    .nav-toggle{display:grid;}
+    .nav-links{
+      display:none;position:absolute;top:calc(100% + 10px);left:0;right:0;
+      flex-direction:column;align-items:stretch;gap:2px;margin:0;padding:10px;
+      background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);
+      box-shadow:0 24px 60px rgba(0,0,0,.55);
+    }
+    .nav{position:relative;}
+    body.nav-open .nav-links{display:flex;}
+    .nav-links a,.nav-drop>button{padding:13px;width:100%;justify-content:space-between;}
+    .nav-drop{width:100%;}
+    .drop-panel{position:static;min-width:0;box-shadow:none;background:var(--charcoal-2);
+      opacity:1;visibility:visible;transform:none;display:none;margin-top:4px;}
+    .nav-drop[data-open="true"] .drop-panel{display:block;}
+    .nav-cta .btn{padding:10px 15px;font-size:.88rem;}
+    /* flip the sticker to the free side of the button so it never sits under the hamburger */
+    .sale-sticker{right:auto;left:-9px;transform:rotate(-9deg);}
+    .btn:hover .sale-sticker{transform:rotate(-9deg) scale(1.06);}
+    .brand .bname{display:none;}
+    /* the pill is tight at this width — let the brand mark and the buy button sit close
+       instead of being flung to opposite ends */
+    .nav{gap:10px;padding-right:8px;padding-left:12px;}
+    .nav-spacer{display:none;}
+    .nav-cta{margin-left:auto;}
+  }
+  @media (max-width:760px){
+    .checklist{grid-template-columns:1fr;}
+    .fcards{grid-template-columns:1fr;}
+    .logo-row{grid-template-columns:1fr 1fr;}
+    .btn-row .btn{flex:1 1 auto;}
+    .proofrow{gap:10px 20px;}
+    .dealbar{font-size:.78rem;gap:8px;}
+    .dealbar .db-long{display:none;}
+    .dealbar .db-short{display:inline;}
+  }
+  @media (max-width:640px){
+    /* shorten the navbar CTA so it never crowds the hamburger */
+    .nb-long{display:none;}
+    .nb-short{display:inline;}
+  }
+  @media (max-width:560px){
+    :root{--gutter:1.1rem;}
+    .hero h1{font-size:clamp(2rem,8.6vw,2.7rem);}
+    .foot-grid{grid-template-columns:1fr;gap:34px;}
+    .stats{grid-template-columns:1fr 1fr;gap:26px 12px;}
+    .hero-pill{font-size:.78rem;padding-left:12px;}
+    .logo-row{gap:10px;}
+    .logo-chip{padding:13px 8px;font-size:.86rem;}
+    .quote-card .who{align-items:flex-start;}
   }
 </style>
 </head>
 <body>
 
-<!-- Keyboard users: jump straight past the deal bar into the content -->
+<!-- Keyboard users: jump straight past the deal bar + navbar into the content -->
 <a class="skip-link" href="#main-content">Skip to content</a>
 
 <!-- 3D BACKGROUND (floating book) — purely decorative, never blocks clicks -->
 <canvas id="bg-canvas" aria-hidden="true"></canvas>
 
-<!-- DEAL BAR -->
+<!-- ===== ANNOUNCEMENT BAR ===== -->
 <div class="dealbar" role="region" aria-label="Launch deal">
-  <span class="pulse" aria-hidden="true"></span>Launch deal — full book <span class="strike">$5.99</span> now just $3.99
-  <span class="db-timer">· ends in <b id="dealClock">48:00:00</b></span>
+  <span class="db-tag"><span class="pulse" aria-hidden="true"></span>Launch deal</span>
+  <span class="db-long">Full book <span class="strike">$5.99</span> — now just <b>$3.99</b></span>
+  <span class="db-short"><span class="strike">$5.99</span> <b>$3.99</b></span>
+  <span class="db-clock">ends in <b id="dealClock">48:00:00</b></span>
+</div>
+
+<!-- ===== FLOATING PILL NAVBAR ===== -->
+<div class="navwrap">
+  <nav class="nav" aria-label="Main">
+    <!-- Logo mark: the title drawn literally. Three dots climb from the bottom-left
+         (traffic, accelerating — they grow as they rise) into a coin (treasure), the same
+         beat as the book cover's dotted trail. Matches the favicon. -->
+    <a class="brand" href="#main-content" aria-label="Traffic to Treasure — top of page">
+      <svg class="mark" viewBox="0 0 32 32" width="32" height="32" aria-hidden="true" focusable="false">
+        <rect width="32" height="32" rx="9" fill="#c8ff37"/>
+        <g fill="#11140f">
+          <circle cx="6.4" cy="25.6" r="1.35"/>
+          <circle cx="10.4" cy="22.8" r="1.6"/>
+          <circle cx="14.3" cy="19.7" r="1.8"/>
+          <circle cx="21.6" cy="12.4" r="6.1"/>
+        </g>
+        <g fill="none" stroke="#c8ff37" stroke-width="1.35" stroke-linecap="round">
+          <path d="M21.6 7.2v10.4"/>
+          <path d="M23.7 10c0-1.3-1-1.6-2.1-1.6s-2.1.5-2.1 1.6 1 1.6 2.1 2.4 2.1 1.3 2.1 2.4-1 1.6-2.1 1.6-2.1-.3-2.1-1.6"/>
+        </g>
+      </svg>
+      <span class="bname">TRAFFIC TO TREASURE</span>
+    </a>
+
+    <div class="nav-links" id="navLinks">
+      <div class="nav-drop" id="navDrop" data-open="false">
+        <button type="button" aria-expanded="false" aria-controls="dropPanel">
+          The book
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="drop-panel" id="dropPanel" role="menu">
+          <a class="drop-item" href="#inside" role="menuitem">
+            <span class="di-ic" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
+            <span>
+              <span class="di-t">What's inside</span>
+              <span class="di-d">The full loop, chapter by chapter</span>
+            </span>
+          </a>
+          <a class="drop-item" href="#preview" role="menuitem">
+            <span class="di-ic" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></span>
+            <span>
+              <span class="di-t">Look inside</span>
+              <span class="di-d">Real pages from the book</span>
+            </span>
+          </a>
+          <a class="drop-item" href="#free" role="menuitem">
+            <span class="di-ic" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg></span>
+            <span>
+              <span class="di-t">Free lite version</span>
+              <span class="di-d">No card, no email — read it today</span>
+            </span>
+          </a>
+        </div>
+      </div>
+      <a href="#why">Why this one</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+    </div>
+
+    <span class="nav-spacer"></span>
+
+    <div class="nav-cta">
+      <!-- each label is a single flex child: a bare text node would also pick up the
+           button's 8px flex gap and open a hole before the dash -->
+      <a class="btn btn-primary btn-sm" href="https://payhip.com/buy?link=aJTdq"><span class="sale-sticker">$5.99</span><span class="nb-long">Get the book — $3.99</span><span class="nb-short">Get it — $3.99</span></a>
+      <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="navLinks" aria-label="Open menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+    </div>
+  </nav>
 </div>
 
 <main id="main-content">
 
-<!-- 1. HERO -->
+<!-- ===== 1. HERO ===== -->
 <section class="hero">
   <div class="wrap hero-grid">
     <div>
-      <span class="eyebrow">No product · no money to start · no audience</span>
-      <h1>I went from <span class="hl">0 followers</span> to getting paid by ads.</h1>
+      <a class="hero-pill" href="#free">
+        <span>No product · no money to start · no audience</span>
+        <span class="hp-tag">Start free</span>
+      </a>
+      <h1>I went from <span class="hl">0&nbsp;followers</span> to getting paid by ads.</h1>
       <p class="sub">Here's the exact playbook I'd hand my younger self: pick a niche that's already hot, blow up on X, and turn that attention into ad money.</p>
-      <div class="hero-price">
-        <span class="pill">33% off launch</span>
-        <span class="pricetag"><span class="was">$5.99</span><span class="cur">$</span><span class="now">3.99</span></span>
-      </div>
+
       <div class="btn-row">
-        <a class="btn btn-primary" href="https://payhip.com/buy?link=aJTdq">Get the full book — $3.99 →</a>
-        <a class="btn btn-ghost" href="#free">Or read the free version</a>
+        <a class="btn btn-primary btn-lg" href="https://payhip.com/buy?link=aJTdq">Get the full book — $3.99
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <a class="btn btn-ghost btn-lg" href="#free">Or read the free version</a>
       </div>
-      <p style="color:var(--muted);font-size:.85rem;margin-top:14px;">Skint right now? Grab the <a href="#free" style="color:var(--lime);text-decoration:none;border-bottom:1px solid var(--line);">free lite version</a> — no card needed.</p>
+      <p class="hero-note">Skint right now? Grab the <a href="#free">free lite version</a> — no card needed.</p>
+
+      <!-- social-proof row: honest facts about the product, not invented reviews -->
+      <div class="proofrow">
+        <span class="pr-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          <span><b>~30 pages</b> · one evening</span>
+        </span>
+        <span class="pr-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          <span><b>Instant PDF</b> · straight to your inbox</span>
+        </span>
+        <span class="pr-item">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+          <span><b>$0</b> to start · every tool has a free tier</span>
+        </span>
+      </div>
     </div>
+
     <div>
       <!-- Static fallback cover: shows instantly (no layout shift); fades once the 3D book renders -->
       <div class="hero-visual" id="heroVisual">
@@ -365,114 +814,276 @@
       </div>
     </div>
   </div>
-</section>
 
-<!-- 2. PROBLEM / HOOK -->
-<section>
-  <div class="wrap">
-    <span class="eyebrow">If this sounds familiar</span>
-    <p class="lead">You keep hearing "just post and stay consistent." Nobody shows you the part where it actually pays.</p>
-    <p class="section-intro" style="margin-top:18px;">So you grind for weeks, the follower count crawls, and the money never shows up. The piece everyone skips isn't the posting. It's what you point that attention at.</p>
-  </div>
-</section>
-
-<!-- 3. BENEFITS -->
-<section>
-  <div class="wrap">
-    <span class="eyebrow">What's inside</span>
-    <h2 class="big">The whole loop, start to finish</h2>
-    <p class="section-intro">Real steps, not vibes. Here's what you walk away knowing how to do.</p>
-    <div class="benefits">
-      <div class="bcard"><span class="tick">✓</span>Pick a niche that's already on fire (5 proven ones, with examples)</div>
-      <div class="bcard"><span class="tick">✓</span>The reply method that got me my first 1,000 followers</div>
-      <div class="bcard"><span class="tick">✓</span>The exact free site setup — built in a weekend, no code</div>
-      <div class="bcard full"><span class="tick">✓</span>How the ads actually pay, and the setup that bumps your payout tier</div>
-      <div class="bcard full"><span class="tick">✓</span>The clickbait + clean-link traffic system that feeds it all</div>
-      <div class="bcard full"><span class="tick">✓</span>How to stack a second site and compound the whole thing</div>
+  <!-- trust strip -->
+  <div class="wrap trust">
+    <p class="t-label">Built entirely on tools with a free tier</p>
+    <div class="logo-row">
+      <div class="logo-chip">X <span class="lc-free">free</span></div>
+      <div class="logo-chip">GitHub Pages <span class="lc-free">free</span></div>
+      <div class="logo-chip">Monetag <span class="lc-free">free</span></div>
+      <div class="logo-chip">Carrd <span class="lc-free">free</span></div>
+      <div class="logo-chip">Payhip <span class="lc-free">free</span></div>
     </div>
   </div>
 </section>
 
-<!-- 4. COVER + INTERIOR PREVIEW -->
-<section>
+<!-- ===== 2. PROBLEM / HOOK + 4-UP FEATURE CARDS ===== -->
+<section id="why" class="sec-line">
   <div class="wrap">
-    <span class="eyebrow">A look inside</span>
-    <h2 class="big">It's short on purpose</h2>
-    <p class="section-intro">30-ish pages you'll actually finish. Every chapter ends with one thing to go do.</p>
-    <div class="preview-row">
-      <figure class="pg-fig"><img src="images/ch1_opener.webp" width="600" height="600" loading="lazy" decoding="async" alt="The loop on one page" /><figcaption>The loop on one page</figcaption></figure>
-      <figure class="pg-fig"><img src="images/ch3_viral_thread.webp" width="600" height="600" loading="lazy" decoding="async" alt="Anatomy of a viral thread" /><figcaption>Anatomy of a viral thread</figcaption></figure>
-      <figure class="pg-fig"><img src="images/ch2_five_niches.webp" width="600" height="600" loading="lazy" decoding="async" alt="The 5 hot niches" /><figcaption>The 5 hot niches</figcaption></figure>
+    <div class="sec-head center wide">
+      <span class="eyebrow">If this sounds familiar</span>
+      <h2 class="big">You keep hearing &ldquo;just post and stay&nbsp;consistent.&rdquo;<br><span class="hl">Nobody shows you the part where it pays.</span></h2>
+      <p>So you grind for weeks, the follower count crawls, and the money never shows up. The piece everyone skips isn't the posting. It's what you point that attention at.</p>
     </div>
-  </div>
-</section>
 
-<!-- 5. PROOF -->
-<section class="proof">
-  <div class="wrap">
-    <span class="eyebrow">Why I wrote this</span>
-    <div class="quote">
-      I'm not a guru and I'm not selling a dream. I just got tired of watching people post into the void and quit at day 30 — right before the part that pays. So I wrote down the exact loop, including the boring setup steps everyone skips.
-      <span class="who">— why I wrote this</span>
-    </div>
-  </div>
-</section>
-
-<!-- 6. FULL vs LITE -->
-<section>
-  <div class="wrap">
-    <span class="eyebrow">Free vs full</span>
-    <h2 class="big">What's in each version</h2>
-    <p class="section-intro">The free lite book gets you moving. The full book closes the loop and shows you the money part.</p>
-    <table class="cmp">
-      <tr><th>What you get</th><th>Free lite</th><th class="full">Full book</th></tr>
-      <tr><td>Pick your niche + the X growth method</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
-      <tr><td>Build your free site</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
-      <tr><td>The ad setup that actually pays (Monetag)</td><td class="no">—</td><td class="yes">Yes</td></tr>
-      <tr><td>The link that unlocks the higher payout tier</td><td class="no">—</td><td class="yes">Yes</td></tr>
-      <tr><td>Traffic + clean-link system</td><td class="no">—</td><td class="yes">Yes</td></tr>
-      <tr><td>Stacking + scaling to more income</td><td class="no">—</td><td class="yes">Yes</td></tr>
-      <tr><td>User experience</td><td class="no">High friction — 3+ ad layers, fake buttons &amp; countdowns on Up4Ever</td><td class="yes">Zero friction — instant, secure, ad-free PDF via Payhip + email delivery</td></tr>
-    </table>
-    <p style="color:var(--muted);font-size:.86rem;margin-top:18px;">Don't want to deal with file-host ads and countdowns? Grab the full playbook for <span style="color:var(--lime);font-weight:600;">$3.99</span> and get an instant, direct PDF right now. <a href="#deal" style="color:var(--lime);text-decoration:none;border-bottom:1px solid var(--line);">See the deal →</a></p>
-  </div>
-</section>
-
-<!-- 7. PRIMARY CTA (deal card) -->
-<section class="band">
-  <div class="wrap">
-    <h2>Get the full playbook</h2>
-    <p>Instant download after checkout. Read it tonight, start tomorrow.</p>
-
-    <div class="deal-card" id="deal">
-      <span class="ribbon pill">Launch price · 33% off</span>
-      <div class="save">You save $2.00</div>
-      <div class="pricetag">
-        <span class="was">$5.99</span><span class="cur">$</span><span class="now">3.99</span>
+    <div class="fcards">
+      <div class="fcard">
+        <span class="ic" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span>
+        <h3>Short on purpose</h3>
+        <p>About 30 pages you'll actually finish tonight — not a 300-page course you'll abandon on page 12.</p>
       </div>
-      <p class="anchor">Less than a coffee — one-time, yours forever, instant PDF.</p>
-      <div class="btn-row" style="justify-content:center;margin-top:22px;">
-        <a class="btn btn-primary" href="https://payhip.com/buy?link=aJTdq">Lock in $3.99 →</a>
+      <div class="fcard">
+        <span class="ic" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
+        <h3>Zero budget to start</h3>
+        <p>Every tool in the playbook has a free tier. No hosting bill, no ad spend, no subscriptions to cancel.</p>
       </div>
-      <div class="skipbadge"><span class="bolt">⚡</span> Skip the Up4Ever ads &amp; get instant access</div>
-      <p class="urgency"><b>Heads up:</b> launch price ends in <b id="dealClock2" style="color:var(--lime);font-variant-numeric:tabular-nums;">48:00:00</b> — then back to $5.99.</p>
+      <div class="fcard">
+        <span class="ic" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-5 3 3 5-7"/></svg></span>
+        <h3>Starts at zero followers</h3>
+        <p>The book opens with an empty account. The first real chapter is how to get your first thousand.</p>
+      </div>
+      <div class="fcard">
+        <span class="ic" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg></span>
+        <h3>One action per chapter</h3>
+        <p>Every chapter ends with a single thing to go do. Read a chapter, do the thing, move on.</p>
+      </div>
     </div>
-
-    <div class="author">
-      <img src="images/cameron.webp" width="120" height="120" loading="lazy" decoding="async" alt="Cameron Loyce" />
-      <p class="atext">"I use Up4Ever to <b>teach</b> you the ad model — but Payhip to <b>serve</b> you. The paid version is instant, clean, and lands straight in your inbox. No fake buttons, no countdowns." <br>— <b>Cameron Loyce</b></p>
-    </div>
-
-    <p style="color:var(--muted);font-size:.85rem;margin-top:22px;">Not ready? The <a href="#free" style="color:var(--lime);text-decoration:none;border-bottom:1px solid var(--line);">free lite version</a> is right below.</p>
   </div>
 </section>
 
-<!-- 8. FREE DOWNLOAD GATE -->
+<!-- ===== 3. WHAT'S INSIDE — split heading + checklist ===== -->
+<section id="inside" class="sec-line">
+  <div class="wrap split">
+    <div class="sec-head">
+      <span class="eyebrow">What's inside</span>
+      <h2 class="big">The whole loop, start to finish</h2>
+      <p>Real steps, not vibes. Here's what you walk away knowing how to do.</p>
+      <div class="btn-row">
+        <a class="btn btn-primary" href="https://payhip.com/buy?link=aJTdq">Get the full book — $3.99</a>
+      </div>
+    </div>
+
+    <div class="checklist">
+      <div class="bcard">
+        <div class="btop">
+          <span class="tick" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+          <span>Pick a niche that's already on fire (5 proven ones, with examples)</span>
+        </div>
+        <span class="badge-lite">In the free version</span>
+      </div>
+      <div class="bcard">
+        <div class="btop">
+          <span class="tick" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+          <span>The reply method that got me my first 1,000 followers</span>
+        </div>
+        <span class="badge-lite">In the free version</span>
+      </div>
+      <div class="bcard">
+        <div class="btop">
+          <span class="tick" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+          <span>The exact free site setup — built in a weekend, no code</span>
+        </div>
+        <span class="badge-lite">In the free version</span>
+      </div>
+      <div class="bcard full">
+        <div class="btop">
+          <span class="tick" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+          <span>How the ads actually pay, and the setup that bumps your payout tier</span>
+        </div>
+        <span class="badge-full">Full book</span>
+      </div>
+      <div class="bcard full">
+        <div class="btop">
+          <span class="tick" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+          <span>The clickbait + clean-link traffic system that feeds it all</span>
+        </div>
+        <span class="badge-full">Full book</span>
+      </div>
+      <div class="bcard full">
+        <div class="btop">
+          <span class="tick" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+          <span>How to stack a second site and compound the whole thing</span>
+        </div>
+        <span class="badge-full">Full book</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 4. LOOK INSIDE — vertical tab browser ===== -->
+<section id="preview" class="sec-line">
+  <div class="wrap">
+    <div class="sec-head center">
+      <span class="eyebrow">A look inside</span>
+      <h2 class="big">It's short on purpose</h2>
+      <p>30-ish pages you'll actually finish. Every chapter ends with one thing to go do.</p>
+    </div>
+
+    <div class="navs">
+      <div class="tablist" role="tablist" aria-label="Book preview">
+        <button class="tabbtn" role="tab" id="tab-1" aria-controls="pane-1" aria-selected="true" type="button">
+          <span class="t-ic" aria-hidden="true"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.22-8.56"/><path d="M21 3v6h-6"/></svg></span>
+          <span>
+            <span class="t-t">The loop on one page</span>
+            <span class="t-d">Attention in, ad revenue out — the whole business drawn as a single diagram.</span>
+          </span>
+        </button>
+        <button class="tabbtn" role="tab" id="tab-2" aria-controls="pane-2" aria-selected="false" type="button" tabindex="-1">
+          <span class="t-ic" aria-hidden="true"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+          <span>
+            <span class="t-t">Anatomy of a viral thread</span>
+            <span class="t-d">Hook, body, payoff — pulled apart line by line so you can copy the shape.</span>
+          </span>
+        </button>
+        <button class="tabbtn" role="tab" id="tab-3" aria-controls="pane-3" aria-selected="false" type="button" tabindex="-1">
+          <span class="t-ic" aria-hidden="true"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5 4 19l1.5-4.5"/><path d="M14.5 4 20 9.5"/><path d="m18 2 4 4-11 11-4 1 1-4z"/></svg></span>
+          <span>
+            <span class="t-t">The 5 hot niches</span>
+            <span class="t-d">Where the attention already is, with real examples of accounts working each one.</span>
+          </span>
+        </button>
+      </div>
+
+      <div class="tabpanes">
+        <figure class="tabpane active" id="pane-1" role="tabpanel" aria-labelledby="tab-1">
+          <img src="images/ch1_opener.webp" width="600" height="600" fetchpriority="low" decoding="async" alt="A page from chapter 1 showing the whole loop as one diagram" />
+          <figcaption>Chapter 1 — the loop on one page</figcaption>
+        </figure>
+        <figure class="tabpane" id="pane-2" role="tabpanel" aria-labelledby="tab-2" hidden>
+          <img src="images/ch3_viral_thread.webp" width="600" height="600" loading="lazy" decoding="async" alt="A page from chapter 3 breaking down a viral thread" />
+          <figcaption>Chapter 3 — anatomy of a viral thread</figcaption>
+        </figure>
+        <figure class="tabpane" id="pane-3" role="tabpanel" aria-labelledby="tab-3" hidden>
+          <img src="images/ch2_five_niches.webp" width="600" height="600" loading="lazy" decoding="async" alt="A page from chapter 2 listing the five hot niches" />
+          <figcaption>Chapter 2 — the 5 hot niches</figcaption>
+        </figure>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 5. TESTIMONIAL + STAT BAND ===== -->
+<section class="proof-band">
+  <div class="wrap">
+    <div class="quote-card">
+      <span class="qmark" aria-hidden="true"><svg width="38" height="38" viewBox="0 0 24 24" fill="currentColor"><path d="M9.5 4C6 4 3 7 3 10.5c0 3.2 2.4 5.5 5.3 5.5.3 0 .6 0 .9-.1-.7 2.1-2.4 3.4-4.2 4.1l.6 1.5c3.6-1.2 6.4-4.2 6.4-9.1V10C12 6.5 11 4 9.5 4zm9 0C15 4 12 7 12 10.5c0 3.2 2.4 5.5 5.3 5.5.3 0 .6 0 .9-.1-.7 2.1-2.4 3.4-4.2 4.1l.6 1.5c3.6-1.2 6.4-4.2 6.4-9.1V10C21 6.5 20 4 18.5 4z"/></svg></span>
+      <p class="q">I'm not a guru and I'm not selling a dream. I just got tired of watching people post into the void and quit at day 30 — right before the part that pays. So I wrote down the exact loop, including the boring setup steps everyone skips.</p>
+      <div class="who">
+        <img src="images/cameron.webp" width="120" height="120" loading="lazy" decoding="async" alt="Cameron Loyce" />
+        <span>
+          <span class="wn">Cameron Loyce</span>
+          <span class="wr">Author, Traffic to Treasure</span>
+        </span>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="sv">9</div><div class="sl">chapters, front to back</div></div>
+      <div class="stat"><div class="sv">~30</div><div class="sl">pages — one evening's read</div></div>
+      <div class="stat"><div class="sv">$0</div><div class="sl">to start, every tool free</div></div>
+      <div class="stat"><div class="sv">1</div><div class="sl">action at the end of each chapter</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 6. PRICING ===== -->
+<section id="pricing">
+  <div class="wrap">
+    <div class="sec-head center">
+      <span class="eyebrow">Free vs full</span>
+      <h2 class="big">Simple, honest pricing</h2>
+      <p>The free lite book gets you moving. The full book closes the loop and shows you the money part.</p>
+    </div>
+
+    <div class="pricing">
+      <!-- FREE -->
+      <div class="plan">
+        <h3>Free lite version</h3>
+        <p class="p-for">Best if you're broke and just want to start</p>
+        <div class="pricetag"><span class="cur">$</span><span class="now">0</span><span class="per">forever</span></div>
+        <p class="p-anchor">Hosted on Up4Ever — you'll sit through the ads.</p>
+        <ul>
+          <li class="yes"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Pick your niche + the X growth method</li>
+          <li class="yes"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Build your free site</li>
+          <li class="no"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>The ad setup that actually pays</li>
+          <li class="no"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>Traffic, payout tier + scaling chapters</li>
+          <li class="no"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>Clean, instant, ad-free download</li>
+        </ul>
+        <div class="p-foot">
+          <a class="btn btn-ghost btn-block" href="#free">Get the free version</a>
+          <p class="p-note">No card, no email. <b>Ads and a countdown</b> on the host page.</p>
+        </div>
+      </div>
+
+      <!-- FULL -->
+      <div class="plan featured" id="deal">
+        <span class="ribbon">Best value · 33% off launch</span>
+        <h3>The full playbook</h3>
+        <p class="p-for">Best if you actually want the money part</p>
+        <div class="pricetag">
+          <span class="was">$5.99</span><span class="cur">$</span><span class="now">3.99</span><span class="per">one-time</span>
+        </div>
+        <p class="p-save">You save $2.00</p>
+        <p class="p-anchor">Less than a coffee — yours forever, instant PDF.</p>
+        <ul>
+          <li class="yes"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Everything in the free version</li>
+          <li class="yes"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>The ad setup that actually pays (Monetag)</li>
+          <li class="yes"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>The link that unlocks the higher payout tier</li>
+          <li class="yes"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Traffic + clean-link system, stacking &amp; scaling</li>
+          <li class="yes"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Zero friction — secure, ad-free PDF via Payhip</li>
+        </ul>
+        <!-- the badge sits above the button so both plans' footers are button + one note,
+             which lands the two CTAs on the same baseline -->
+        <div class="skipbadge"><span class="bolt" aria-hidden="true">⚡</span> Skip the Up4Ever ads &amp; get instant access</div>
+        <div class="p-foot">
+          <a class="btn btn-primary btn-block" href="https://payhip.com/buy?link=aJTdq">Lock in $3.99
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+          <p class="p-note"><b>Heads up:</b> launch price ends in <b id="dealClock2" style="color:var(--lime);font-variant-numeric:tabular-nums;">48:00:00</b> — then back to $5.99.</p>
+        </div>
+      </div>
+    </div>
+
+    <p class="enterprise">Not ready? The <a class="inline-link" href="#free">free lite version</a> is right below — no card, no email.</p>
+
+    <!-- full comparison -->
+    <div class="cmp-wrap">
+      <table class="cmp">
+        <tr><th>What you get</th><th>Free lite</th><th class="full">Full book</th></tr>
+        <tr><td>Pick your niche + the X growth method</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
+        <tr><td>Build your free site</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
+        <tr><td>The ad setup that actually pays (Monetag)</td><td class="no">—</td><td class="yes">Yes</td></tr>
+        <tr><td>The link that unlocks the higher payout tier</td><td class="no">—</td><td class="yes">Yes</td></tr>
+        <tr><td>Traffic + clean-link system</td><td class="no">—</td><td class="yes">Yes</td></tr>
+        <tr><td>Stacking + scaling to more income</td><td class="no">—</td><td class="yes">Yes</td></tr>
+        <tr><td>User experience</td><td class="no">High friction — 3+ ad layers, fake buttons &amp; countdowns on Up4Ever</td><td class="yes">Zero friction — instant, secure, ad-free PDF via Payhip + email delivery</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 7. FREE DOWNLOAD GATE ===== -->
 <section class="free-gate" id="free">
   <div class="wrap">
+    <div class="sec-head center">
+      <span class="eyebrow">Zero risk</span>
+      <h2 class="big">Start free</h2>
+      <p>The lite version costs nothing. There's a catch, and I'm telling you about it up front.</p>
+    </div>
+
     <div class="gate-card">
       <span class="demo-badge">⚠ Live demo of the ad model</span>
-      <h2 class="big" style="margin-top:6px;">Start free. Zero risk.</h2>
 
       <div class="warnbox">
         <p class="wtitle">Heads up — this is on purpose</p>
@@ -484,76 +1095,167 @@
         <p class="atext">"I'm <b>Cameron</b>. I host the free version on Up4Ever on purpose — to show you how ad revenue works in the wild. If the ads look scary, that's the point. Trust the process and you'll know exactly how to navigate it."</p>
       </div>
 
-      <div class="btn-row" style="justify-content:center;">
-        <a class="btn btn-primary" href="https://www.up-4ever.net/55zofzcrdiin">Download the free version</a>
+      <div class="btn-row center">
+        <a class="btn btn-primary btn-lg" href="https://www.up-4ever.net/55zofzcrdiin">Download the free version</a>
       </div>
 
       <div class="host-guide">
         <p class="hg-title">On the host page:</p>
-        <ul>
+        <ol>
           <li>Ignore the flashing banners and fake buttons.</li>
           <li>Look for the real <b>"Free Download"</b> button.</li>
           <li>Pass the captcha if it asks, then wait out the countdown.</li>
           <li>The PDF downloads on its own. Done.</li>
-        </ul>
+        </ol>
       </div>
 
-      <details style="text-align:left;margin-top:16px;">
-        <summary>Is the Up4Ever link safe?</summary>
+      <details>
+        <summary>Is the Up4Ever link safe?
+          <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </summary>
         <div class="ans">Yes. The file is a standard PDF — nothing else. The ads come from the host (Up4Ever), not from me. Just ignore the flashing banners and click the real "Download" button when the timer ends. Want a 100% clean experience? Grab the paid version — instant, ad-free, straight to your email.</div>
       </details>
 
-      <p class="tiny">Don't want to deal with the ads and countdowns? The full book is a clean, instant, 1-click download for <span style="color:var(--lime);font-weight:600;">$3.99 right now</span> <span class="strike" style="color:var(--muted);">$5.99</span>. <a href="#deal" style="color:var(--lime);text-decoration:none;border-bottom:1px solid var(--line);">Grab the deal.</a></p>
+      <p class="tiny">Don't want to deal with the ads and countdowns? The full book is a clean, instant, 1-click download for <span style="color:var(--lime);font-weight:600;">$3.99 right now</span> <span class="strike" style="color:var(--muted);">$5.99</span>. <a class="inline-link" href="#deal">Grab the deal.</a></p>
     </div>
   </div>
 </section>
 
-<!-- 9. FAQ -->
-<section>
+<!-- ===== 8. FAQ ===== -->
+<section id="faq" class="sec-line">
   <div class="wrap">
-    <span class="eyebrow">Quick answers</span>
-    <h2 class="big">Before you ask</h2>
-    <div style="margin-top:26px;">
-      <details><summary>What's the difference between the free and full version?</summary><div class="ans">The free lite book covers picking your niche and growing on X. The full book adds the part that makes money — the ad setup, the payout-tier link, the traffic system, and how to scale.</div></details>
-      <details><summary>How much is the full book?</summary><div class="ans">It's $3.99 right now, down from $5.99 for the launch. One-time payment, yours forever, instant PDF download. The price goes back up to $5.99 once the launch window closes.</div></details>
-      <details><summary>Is it really free?</summary><div class="ans">Yes — the lite version costs nothing. You just watch one short ad on the download page. No card, no email required.</div></details>
-      <details><summary>Do I need money to start?</summary><div class="ans">No. Every tool in the playbook has a free tier. The whole point is starting from zero.</div></details>
-      <details><summary>Do I need followers already?</summary><div class="ans">No. The book opens at zero followers and the first real chapter is how to get your first thousand.</div></details>
-      <details><summary>How long does this take?</summary><div class="ans">The reading is one evening. The growth is the slow part — most people quit at day 30. Stick past that and it compounds.</div></details>
+    <div class="sec-head center">
+      <span class="eyebrow">Quick answers</span>
+      <h2 class="big">Frequently asked questions</h2>
+      <p>Everything people ask before they buy. Anything missing? Email me.</p>
+    </div>
+
+    <div class="faq">
+      <details>
+        <summary>What's the difference between the free and full version?
+          <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </summary>
+        <div class="ans">The free lite book covers picking your niche and growing on X. The full book adds the part that makes money — the ad setup, the payout-tier link, the traffic system, and how to scale.</div>
+      </details>
+      <details>
+        <summary>How much is the full book?
+          <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </summary>
+        <div class="ans">It's $3.99 right now, down from $5.99 for the launch. One-time payment, yours forever, instant PDF download. The price goes back up to $5.99 once the launch window closes.</div>
+      </details>
+      <details>
+        <summary>Is it really free?
+          <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </summary>
+        <div class="ans">Yes — the lite version costs nothing. You just watch one short ad on the download page. No card, no email required.</div>
+      </details>
+      <details>
+        <summary>Do I need money to start?
+          <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </summary>
+        <div class="ans">No. Every tool in the playbook has a free tier. The whole point is starting from zero.</div>
+      </details>
+      <details>
+        <summary>Do I need followers already?
+          <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </summary>
+        <div class="ans">No. The book opens at zero followers and the first real chapter is how to get your first thousand.</div>
+      </details>
+      <details>
+        <summary>How long does this take?
+          <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </summary>
+        <div class="ans">The reading is one evening. The growth is the slow part — most people quit at day 30. Stick past that and it compounds.</div>
+      </details>
     </div>
   </div>
 </section>
 
-<!-- 10. FINAL CTA -->
+<!-- ===== 9. FINAL CTA ===== -->
 <section class="band" id="finalCta">
-  <div class="wrap">
+  <div class="wrap-narrow">
     <h2>Start from zero. Get paid.</h2>
     <p>Read it free, or own the whole playbook for the price of a coffee.</p>
-    <div class="hero-price" style="justify-content:center;">
+    <div class="hero-price">
       <span class="pill">33% off — ends soon</span>
       <span class="pricetag"><span class="was">$5.99</span><span class="cur">$</span><span class="now">3.99</span></span>
     </div>
-    <div class="btn-row" style="justify-content:center;margin-top:18px;">
-      <a class="btn btn-primary" href="https://payhip.com/buy?link=aJTdq">Get the full book — $3.99 →</a>
-      <a class="btn btn-ghost" href="#free">Read it free first</a>
+    <div class="btn-row center">
+      <a class="btn btn-primary btn-lg" href="https://payhip.com/buy?link=aJTdq">Get the full book — $3.99
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <a class="btn btn-ghost btn-lg" href="#free">Read it free first</a>
     </div>
   </div>
 </section>
 
 </main>
 
-<!-- 11. FOOTER -->
+<!-- ===== FOOTER ===== -->
 <footer>
   <div class="wrap">
-    <p><strong style="color:var(--ink);font-family:'Space Grotesk';">TRAFFIC TO TREASURE</strong></p>
-    <nav class="footer-links" aria-label="Footer">
-      <a href="#free">Free version</a>
-      <a href="#deal">Get the full book</a>
-      <a href="#finalCta">Pricing</a>
-      <a href="mailto:hello@traffictotreasure.co">Contact &amp; refunds</a>
-    </nav>
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a class="brand" href="#main-content" aria-label="Traffic to Treasure — top of page">
+          <svg class="mark" viewBox="0 0 32 32" width="32" height="32" aria-hidden="true" focusable="false">
+            <rect width="32" height="32" rx="9" fill="#c8ff37"/>
+            <g fill="#11140f">
+              <circle cx="6.4" cy="25.6" r="1.35"/>
+              <circle cx="10.4" cy="22.8" r="1.6"/>
+              <circle cx="14.3" cy="19.7" r="1.8"/>
+              <circle cx="21.6" cy="12.4" r="6.1"/>
+            </g>
+            <g fill="none" stroke="#c8ff37" stroke-width="1.35" stroke-linecap="round">
+              <path d="M21.6 7.2v10.4"/>
+              <path d="M23.7 10c0-1.3-1-1.6-2.1-1.6s-2.1.5-2.1 1.6 1 1.6 2.1 2.4 2.1 1.3 2.1 2.4-1 1.6-2.1 1.6-2.1-.3-2.1-1.6"/>
+            </g>
+          </svg>
+          <span class="bname">TRAFFIC TO TREASURE</span>
+        </a>
+        <p>The lazy beginner's playbook for turning attention on X into ad revenue — starting from zero followers and a zero budget.</p>
+      </div>
+
+      <div class="foot-col">
+        <h4>The book</h4>
+        <ul>
+          <li><a href="#inside">What's inside</a></li>
+          <li><a href="#preview">Look inside</a></li>
+          <li><a href="#pricing">Pricing</a></li>
+          <li><a href="#free">Free version<span class="tag">Free</span></a></li>
+        </ul>
+      </div>
+
+      <div class="foot-col">
+        <h4>Support</h4>
+        <ul>
+          <li><a href="#faq">FAQ</a></li>
+          <li><a href="mailto:hello@traffictotreasure.co">Contact</a></li>
+          <li><a href="mailto:hello@traffictotreasure.co">Refunds</a></li>
+        </ul>
+      </div>
+
+      <div class="foot-col">
+        <h4>Get it now</h4>
+        <div class="foot-cta">
+          <p class="fc-t">Launch price — $3.99</p>
+          <p>Instant, ad-free PDF. Was $5.99.</p>
+          <a class="btn btn-primary btn-sm btn-block" href="https://payhip.com/buy?link=aJTdq">Get the full book</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="foot-bottom">
+      <p>© 2026 Traffic to Treasure</p>
+      <div class="socials">
+        <a href="https://x.com" aria-label="X">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.9 2H22l-6.8 7.8L23 22h-6.9l-4.6-6.4L5.9 22H2.8l7.3-8.3L1.7 2h7l4.3 6L18.9 2zm-1.2 18h1.7L6.4 3.8H4.6L17.7 20z"/></svg>
+        </a>
+        <a href="mailto:hello@traffictotreasure.co" aria-label="Email">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg>
+        </a>
+      </div>
+    </div>
     <p class="disclaimer">Results aren't guaranteed and depend on your own effort and consistency. This isn't financial advice — it's what worked for me, shared honestly. Payments and refunds are handled securely through Payhip.</p>
-    <p style="margin-top:14px;opacity:.6;">© 2026 Traffic to Treasure</p>
   </div>
 </footer>
 
@@ -567,13 +1269,13 @@
 </div>
 
 <!-- EXIT-INTENT UPSELL -->
-<div class="exit-overlay" id="exitPopup" role="dialog" aria-modal="true">
+<div class="exit-overlay" id="exitPopup" role="dialog" aria-modal="true" aria-labelledby="exitTitle">
   <div class="exit-modal">
     <button class="close" id="exitClose" aria-label="Close">×</button>
     <span class="pill">$3.99 · 33% off</span>
-    <h3 style="margin-top:14px;">Tired of the ad demo?</h3>
+    <h3 id="exitTitle">Tired of the ad demo?</h3>
     <p>Get the <b style="color:var(--ink);">instant, ad-free PDF</b> — the full playbook, including the Monetag setup, traffic, and scaling chapters — for just <b style="color:var(--lime);">$3.99</b>. No fake buttons, no countdowns — it lands straight in your inbox.</p>
-    <div class="btn-row" style="justify-content:center;margin-top:20px;">
+    <div class="btn-row center">
       <a class="btn btn-primary" href="https://payhip.com/buy?link=aJTdq">Get the clean version →</a>
     </div>
     <p style="font-size:.78rem;color:var(--muted);margin-top:14px;cursor:pointer;" id="exitDismiss">No thanks, I'll brave the ads</p>
@@ -608,14 +1310,97 @@
   tick();
   setInterval(tick, 1000);
 
-  /* ---------- 2. Sticky mobile buy bar: show after hero, hide over CTA sections ---------- */
+  /* ---------- 2. Navbar: solid-on-scroll, mobile sheet, dropdown ---------- */
+  function onScrollNav(){
+    document.body.classList.toggle('scrolled', window.scrollY > 12);
+  }
+  window.addEventListener('scroll', onScrollNav, {passive:true});
+  onScrollNav();
+
+  var navToggle = document.getElementById('navToggle');
+  if (navToggle) {
+    navToggle.addEventListener('click', function(){
+      var open = document.body.classList.toggle('nav-open');
+      navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      navToggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    });
+  }
+
+  var drop = document.getElementById('navDrop');
+  if (drop) {
+    var dropBtn = drop.querySelector('button');
+    function setDrop(open){
+      drop.setAttribute('data-open', open ? 'true' : 'false');
+      dropBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+    dropBtn.addEventListener('click', function(e){
+      e.stopPropagation();
+      setDrop(drop.getAttribute('data-open') !== 'true');
+    });
+    // desktop hover-intent: the template opens its mega menu on hover
+    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+      var hoverTimer;
+      drop.addEventListener('mouseenter', function(){
+        if (window.innerWidth > 860) { clearTimeout(hoverTimer); setDrop(true); }
+      });
+      drop.addEventListener('mouseleave', function(){
+        if (window.innerWidth > 860) { hoverTimer = setTimeout(function(){ setDrop(false); }, 160); }
+      });
+    }
+    document.addEventListener('click', function(e){
+      if (!drop.contains(e.target)) setDrop(false);
+    });
+    document.addEventListener('keydown', function(e){
+      if (e.key === 'Escape') setDrop(false);
+    });
+  }
+
+  // any nav link closes the mobile sheet
+  document.querySelectorAll('#navLinks a').forEach(function(a){
+    a.addEventListener('click', function(){
+      document.body.classList.remove('nav-open');
+      if (navToggle) navToggle.setAttribute('aria-expanded','false');
+      if (drop) drop.setAttribute('data-open','false');
+    });
+  });
+
+  /* ---------- 3. Preview tabs (vertical tab browser) ---------- */
+  var tabs = [].slice.call(document.querySelectorAll('.tabbtn'));
+  var panes = [].slice.call(document.querySelectorAll('.tabpane'));
+  function selectTab(i){
+    tabs.forEach(function(t, k){
+      var on = k === i;
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+      t.tabIndex = on ? 0 : -1;
+    });
+    panes.forEach(function(p, k){
+      var on = k === i;
+      p.classList.toggle('active', on);
+      if (on) p.removeAttribute('hidden'); else p.setAttribute('hidden','');
+    });
+  }
+  tabs.forEach(function(t, i){
+    t.addEventListener('click', function(){ selectTab(i); });
+    t.addEventListener('keydown', function(e){
+      var next = e.key === 'ArrowDown' || e.key === 'ArrowRight' ? i + 1
+               : e.key === 'ArrowUp'   || e.key === 'ArrowLeft'  ? i - 1 : null;
+      if (next === null) return;
+      e.preventDefault();
+      var j = (next + tabs.length) % tabs.length;
+      selectTab(j);
+      tabs[j].focus();
+    });
+  });
+
+  /* ---------- 4. Sticky mobile buy bar: show after hero, hide over CTA sections ---------- */
   var bar = document.getElementById('mobileBar');
   if (bar) {
     var heroEl = document.querySelector('.hero');
-    var bands = [].slice.call(document.querySelectorAll('.band, #free'));
+    var bands = [].slice.call(document.querySelectorAll('.band, #free, #pricing'));
     var overCTA = false;
     if ('IntersectionObserver' in window) {
-      // hide the bar whenever a CTA section (band / free gate) is on screen — it has its own buttons
+      // hide the bar whenever a CTA section (pricing / band / free gate) is on screen —
+      // those already carry their own buttons
       var ctaObs = new IntersectionObserver(function(entries){
         overCTA = entries.some(function(e){ return e.isIntersecting; }) ||
                   bands.some(function(b){
@@ -639,10 +1424,10 @@
     update();
   }
 
-  /* ---------- 3. Scroll reveal (skipped entirely if reduced motion) ---------- */
+  /* ---------- 5. Scroll reveal (skipped entirely if reduced motion) ---------- */
   if (!reduce && 'IntersectionObserver' in window) {
     var targets = document.querySelectorAll(
-      'section .wrap > h2, .bcard, .pg-fig, .quote, .deal-card, .gate-card, .cmp, details'
+      '.sec-head, .fcard, .bcard, .logo-chip, .tablist, .tabpanes, .quote-card, .stat, .plan, .cmp-wrap, .gate-card, .faq details, .foot-grid'
     );
     targets.forEach(function(el){ el.classList.add('reveal'); });
     var revObs = new IntersectionObserver(function(entries){
@@ -653,7 +1438,7 @@
     targets.forEach(function(el){ revObs.observe(el); });
   }
 
-  /* ---------- 4. Exit-intent upsell (desktop only — mobile false-fires too easily) ---------- */
+  /* ---------- 6. Exit-intent upsell (desktop only — mobile false-fires too easily) ---------- */
   var popup = document.getElementById('exitPopup');
   if (popup) {
     var shown = false;
